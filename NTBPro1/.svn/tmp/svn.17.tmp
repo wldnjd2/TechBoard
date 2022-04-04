@@ -1,0 +1,191 @@
+
+	var cate = '';
+
+	/* 게시글 하단 페이징 처리 */
+	function pageMove(pageSize, cp, flag){
+		
+		
+		
+		/* 페이징에 필요한 변수 */
+		/* 현재 페이지 */
+		var currentPage = cp; 
+		/* 한번에 게시될 페이지 리스트 */
+		var size = pageSize;
+		/* 총 페이지 갯수*/
+		var tp = Math.ceil($("#totalPage").val());
+		/* 현재 페이지 리스트의 마지막 페이지 번호 */
+		var ep = Math.ceil(currentPage/size)*10;
+		/* 현재 페이지 리스트의 첫 페이지 번호 */
+		var sp = (ep-size)+1;
+		/* 현재 카테고리 명*/
+		var cat_cname = $("#category_name").val();
+		/* 기존 동기방식으로 구현했던 하단 페이징 부분 데이터를 지움*/
+		$("#pagination").empty();
+
+		/* 다음 페이지 버튼 클릭시 */
+		if (flag == 'next'){
+		/* 비동기방식으로 처리한 하단 페이징 부분 html코드를 담을 변수 */
+		var str = '';
+		/* '다음'버튼을 클릭했기 때문에 시작번호와 끝번호를 증가시켜준다.*/
+		sp += size; // 11
+		ep = sp+(size-1); // 20
+		/* sp를 현재페이지로 지정 */
+		currentPage = sp;
+				/* 끝페이지가 총 페이지보다 작다면 */
+				if(ep < tp){
+					
+					/* 시작페이지가 1이라면 '이전'버튼 안보이게*/
+					if(sp == 1){
+						
+						for(var i = sp; i <= ep; i++){
+							str += '<a class="paging" href="javascript:void(0)" onclick="javascript:pagination('+i+', \''+cat_cname+'\');">'+i+'</a>'
+						}
+						str += '<a href="javascript:void(0)" onclick="javascript:pageMove('+size+', '+currentPage+', \'next\' )">다음</a>'
+						
+					}else{
+						str += '<a href="javascript:void(0)" onclick="javascript:pageMove('+size+', '+currentPage+', \'pre\')">이전</a>'
+						for(var i = sp; i <= ep; i++){
+							str += '<a class="paging" href="javascript:void(0)" onclick="javascript:pagination('+i+', \''+cat_cname+'\');">'+i+'</a>'
+						}
+						str += '<a href="javascript:void(0)" onclick="javascript:pageMove('+size+', '+currentPage+', \'next\')">다음</a>'
+						
+					}
+				/* 그 외의 경우, 끝페이지가 총페이지보다 크거나 같을 때 */
+				}else{
+					/* 끝페이지번호를 총페이지로 번호로 설정  */
+					ep = tp;
+					for(var i = sp; i <= ep; i++){
+						str += '<a class="paging" href="javascript:void(0)" onclick="javascript:pagination('+i+', \''+cat_cname+'\');">'+i+'</a>'
+					}
+					str = '<a href="javascript:void(0)" onclick="javascript:pageMove('+size+', '+currentPage+', \'pre\')">이전</a>'+str;
+				}
+		/* 이전 페이지 */
+		}else if (flag == 'pre'){
+			/* 비동기방식으로 처리한 하단 페이징 부분 html코드를 담을 변수 */
+			var str = '';
+			/* 이전 버튼을 클릭했기 때문에 시작번호, 끝번호를 감소시켜준다*/
+			sp -= size;
+			ep = sp+(size-1);;
+			/* 현재 끝페이지를 현재페이지로 지정 */
+			currentPage = ep;
+				/* 시작페이지가 1이라면 이전버튼 안보이게*/
+				if(sp == 1){
+					for(var i = sp; i <= ep; i++){
+						str += '<a class="paging" href="javascript:void(0)" onclick="javascript:pagination('+i+', \''+cat_cname+'\');">'+i+'</a>'
+					}
+					str += '<a href="javascript:void(0)" onclick="javascript:pageMove('+size+', '+currentPage+', \'next\')">다음</a>'
+				}else{
+					str += '<a href="javascript:void(0)" onclick="javascript:pageMove('+size+', '+currentPage+', \'pre\')">이전</a>'
+					for(var i = sp; i <= ep; i++){
+						str += '<a class="paging" href="javascript:void(0)" onclick="javascript:pagination('+i+', \''+cat_cname+'\');">'+i+'</a>'
+					}
+					str += '<a href="javascript:void(0)" onclick="javascript:pageMove('+size+', '+currentPage+', \'next\')">다음</a>'
+				}
+			}
+			$("#pagination").html(str);
+			/* 다음 버튼을 누르면 다음 페이지의 데이터를 불러와야 함*/
+			if(cate == ''){
+				pagination(currentPage);
+			}else if(cate != ''){
+				pagination(currentPage, cate);
+			}
+	}
+	
+	/* 페이지 이동하면 데이터를 비동기 방식으로 불러오는 함수 */
+	function pagination(cp, category){
+	
+		$.ajax({
+			url: './main.do',
+			type : 'POST',
+			data: { 'currentPage' : cp, 'cat_cname' : category },
+			dataType: 'json',
+			success:function(data){
+				/* 기존의 동기방식으로 불러온 테이블의 데이터들을 비운다.*/
+				$(".tr-sync").empty();
+				var arr = [];
+
+				
+				/* 비동기방식으로 불러온 데이터가 남아있는 경우가 있어 비동기로 불러온 데이터도 비워준다. */
+				$(".tr-async").empty();
+				
+				
+				for(var i = 0; i < data.resultList.length; i++){
+					arr[i] = '<td>'+data.resultList[i].post_pnum+'</td>'
+							+'<td>'+data.resultList[i].cat_cname+'</td>'
+							+'<td>'+data.resultList[i].post_title+'</td>'
+							+'<td>'+data.resultList[i].user_id+'</td>'
+							+'<td>'+data.resultList[i].post_regdate+'</td>'
+							+'<td>'+data.resultList[i].post_hits+'</td>'
+					
+				/* 비동기방식으로 불러온 데이터들로 테이블의 행들을 채운다 */
+					$("#tr-async"+(i+1)+"").attr("onclick", "moveToDetail("+data.resultList[i].post_pnum+");")
+										   .html(arr[i])
+				}
+				
+			},
+			error:function(data){
+				alert("데이터를 불러오는 중 오류가 발생했습니다.")
+			}
+			
+		})
+		
+	}
+	
+	/* 카테고리 버튼 클릭했을 때 카테고리별 게시글 분류 */
+	function category_pagination(currentPage, categoryName){
+		$.ajax({
+			url : './main.do',
+			type : 'POST',
+			data: { 'currentPage' : currentPage, 'cat_cname' : categoryName },
+			dataType: 'json',
+			success:function(data){
+				
+				/* 페이징에 필요한 변수 */
+				/* 현재 페이지 */
+				var cp = currentPage; 
+				/* 한번에 게시될 페이지 리스트 */
+				var size = data.paginationInfo.pageSize;
+				/* 현재 페이지 리스트의 마지막 페이지 번호 */
+				var ep = Math.ceil(currentPage/size)*10;
+				/* 현재 페이지 리스트의 첫 페이지 번호 */
+				var sp = (ep-size)+1;
+				
+				$("#category_name").val(categoryName)
+				$("#totalPage").val(Math.ceil(data.resultCnt/data.paginationInfo.recordCountPerPage));
+				/* 카테고리를 클릭했을 경우*/
+				if(categoryName != ''){
+					
+					/* 카테고리명, 총 페이지 수 hidden 속성에 값 지정*/
+					var str = '';
+					/*var cat_cname = data.boardVO.cat_cname;*/
+					var tp = Math.ceil(data.resultCnt/data.paginationInfo.recordCountPerPage);
+					
+					/* 끝페이지가 총 페이지보다 작다면 */
+					if(ep < tp){
+						for(var i = sp; i <= ep; i++){
+							str += '<a class="paging" href="javascript:void(0)" onclick="javascript:pagination('+i+', \''+categoryName+'\');">'+i+'</a>'
+						}
+						str += '<a href="javascript:void(0)" onclick="javascript:pageMove('+size+', '+cp+', \'next\')">다음</a>'
+					/* 그 외의 경우, 끝페이지가 총페이지보다 크거나 같을 때  */
+					}else{
+						ep = tp
+						for(var i = sp; i <= ep; i++){
+							str += '<a class="paging" href="javascript:void(0)" onclick="javascript:pagination('+i+', \''+categoryName+'\');">'+i+'</a>'
+						}
+					}
+					
+					pagination(1, categoryName)
+				/* '전체' 버튼을 클릭했을 경우 */
+				}else{
+					var str = '';
+					for(var i = sp; i <= ep; i++){
+						str += '<a class="paging" href="javascript:void(0)" onclick="javascript:pagination('+i+', \''+categoryName+'\');">'+i+'</a>'
+					}
+					str += '<a href="javascript:void(0)" onclick="javascript:pageMove('+data.paginationInfo.pageSize+', '+data.boardVO.currentPage+', \'next\')">다음</a>'
+					
+					pagination(1, categoryName)
+				}
+				$("#pagination").html(str);
+			}
+		})
+	}

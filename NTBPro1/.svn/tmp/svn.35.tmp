@@ -1,0 +1,480 @@
+<%@page import="org.stringtemplate.v4.compiler.STParser.mapExpr_return"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>내가시스템 :: 기술게시판</title>
+<%@ include file="/WEB-INF/jsp/admin/manageUser.jsp" %>
+<%@ include file="/WEB-INF/jsp/board/insertTech.jsp" %>
+<link rel="stylesheet" href="<c:url value='css/main/main.css' />">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.2/semantic.min.css" rel="stylesheet" type="text/css">
+<script
+      src="https://code.jquery.com/jquery-3.1.1.min.js"
+      integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+      crossorigin="anonymous"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="<c:url value='js/main/tech_paging.js'/>"></script>
+<script src="<c:url value='js/admin/manageBoardList.js'/>"></script>
+<script type="text/javascript">
+	function toBase64(event) {
+		var reader = new FileReader();
+		reader.readAsDataURL(event.target.files[0]);
+		reader.onload = function(event) {
+			var base64 = event.target.result;// img -> base64 변환
+			
+			var uploadFile = document.getElementById("user_img");
+	        uploadFile.value = base64;
+	       
+		};
+	}
+	
+	function addList(){
+		$(".modal_addList").css("display", "flex");
+		console.log(user_id)
+		
+		var str = '';
+
+		for(var i = 0; i < categoryList.length; i++){
+			str += '<option value="'+categoryList[i]+'">'+categoryList[i]+'</option>'
+		}
+		str = '<option value="">선택</option>' + str;
+		
+		$("#category_addList").html(str)
+		
+	}
+	
+	function init(){
+		category_pagination(1, '');
+	}
+
+</script>
+
+<!-- modal css -->
+<style>
+.modal_board {
+	box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px
+		rgba(0, 0, 0, 0.23);
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+/* 	모달 배경화면 설정 */
+.modal__overlay {
+	background-color: rgba(0, 0, 0, 0.6);
+	width: 100%;
+	height: 100%;
+	position: absolute;
+}
+
+/* 	모달 박스창 설정 */
+.modal__content {
+	background-color: white;
+	padding: 50px 100px;
+	position: relative;
+	border-radius: 10px;
+	width: 50%;
+	top: 0px;
+	box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px
+		rgba(0, 0, 0, 0.23);
+}
+
+/* 	모달 숨기기 */
+.hidden {
+	display: none;
+}
+
+.modal_table {
+	width: 100%;
+	border: 1px solid #bcbcbc;
+	border-collapse: collapse;
+}
+
+th {
+	border: 1px solid #bcbcbc;
+}
+
+#center {
+	text-align: center;
+}
+
+</style>
+
+<script type="text/javascript">
+	
+	/* 게시글 클릭 시 상세정보로 이동 */
+	function moveToDetail(post_pnum){
+		console.log(post_pnum)
+		
+		$.ajax({
+			url: "${pageContext.request.contextPath}/boardDetail.do",
+			type: "POST",
+			dataType: "json",
+			data: {'post_pnum' : post_pnum},
+			success: function(data){ 
+// 					alert("성공");
+// 					콘솔에 데이터값 찍어보기
+// 					console.log(data);
+// 					console.log(data.resultVO);
+// 					console.log(data.resultVO.cat_cname);
+
+// 			 		Display Modal
+					$(".hidden").css("display", "flex");
+					
+// 					데이터 모달창으로 이동
+					$("#post_pnum").html(data.resultVO.post_pnum);
+					$("#post_regdate").html(data.resultVO.post_regdate);
+					$("#post_title").html(data.resultVO.post_title);
+					$("#post_contents").html(data.resultVO.post_contents);
+					$("#post_img").html(data.resultVO.post_img);
+					$("#post_file").html(data.resultVO.post_file);
+					$("#post_fname").html(data.resultVO.post_fname);
+					$("#post_like").html(data.resultVO.post_like);
+					$("#post_hits").html(data.resultVO.post_hits);
+					$("#user_id").html(data.resultVO.user_id);
+					$("#cat_cname").html(data.resultVO.cat_cname);
+					
+// 					댓글 불러오기 추가해야함
+			}, 
+			error: function (request, status, error){
+				console.log(e);
+				alert("ajax error - moveToDetail")
+			} 
+		});
+	}
+	
+// 	게시판 상세보기 댓글달기
+	function replyInsertBtn(post_pnum){
+		console.log("replyInsertBtn")
+		
+// 		댓글 글자열 변수에 옮김
+		var rep_contents =$('#rep_contents').val();
+		
+// 		로그인 세션값 가져오깅.. 이렇게 하면 변조 될 수 있어서 안됨 -> 컨트롤러 안에 하기 
+// 		var user_id = "${Session_user_id}";
+// 		var post_pnum =$('#post_pnum').val();  덮어쓰는거 안됨 & innerText로 받아온값은 val()안됨
+
+
+		var insertData = {
+					"rep_contents" : rep_contents,
+					"post_pnum" : post_pnum, 
+					 };
+		console.log(insertData)
+		
+		$.ajax({
+			url: "${pageContext.request.contextPath}/insertBoardReply.do",
+			type: "POST",
+			dataType: "json",
+			data: insertData,
+			success: function(data){
+				console.log(data)
+				console.log("ajax success - reply insert");
+				
+				if(data==1){
+					console.log("data == 1"); // 댓글 목록 추가
+					replyShowList(post_pnum);
+				}
+			},
+			error: function(request,status,error){
+// 				console.log(e);
+				alert("ajax error - reply insert")
+				alert("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+
+			}
+		});
+
+
+
+// // 	댓글 불러오기
+// 	function replyShowList(post_pnum){
+// 		alert("replyShow")
+// 		console.log("replyShow");
+// 		$.ajax({
+// 			url: "${pageContext.request.contextPath}/selectBoardReply.do",
+// 			type: "POST",
+// 			dataType: "json",
+// 			data: {'post_pnum' : post_pnum},
+// 			success: function(data){
+				
+// 				console.log(data)
+// 				console.log("ajax success - select");
+				
+// 				$("#rep_rnum").html(data.selectReplyResult.rep_rnum);
+// 				$("#post_regdate").html(data.selectReplyResult.post_regdate);
+// 				$("#rep_contents").html(data.selectReplyResult.rep_contents);
+// 				$("#post_pnum").html(data.selectReplyResult.post_pnum);
+// 				$("#user_id").html(data.selectReplyResult.user_id);
+				
+// 				var a = '';
+// 				$.each(data, function(key, value){
+// 					a += '<div class="commentArea" style="border-bottom:1px solid darkgray; margin-bottom: 15px;">';
+					
+// 					a += '';
+// 					a += '';
+					
+					
+// 				});
+			
+// 			}
+// 			},
+// 			error: function(e){
+// 				console.log(e);
+// 				alert("error")
+// 			}
+// 		});
+		
+}
+</script>
+
+</head>
+<body onload="init();">
+	<div id="all_div">
+		<header>
+			<div id="menu">
+				<span id="welcome_user" style="margin-right: 20px;"></span>
+				<c:if test="${resultUserRank eq 1 }">
+					<a href="javascript:void(0)" class="btn_menu" onclick="moveToAdmin()"><i class="big grey users icon"></i>사용자관리</a>
+				</c:if>
+				<c:choose>
+					<c:when test="${not empty Session_user_id}">
+						<a href="javascript:void(0)" id="update_btn" class="btn_menu"><i class="big grey edit outline icon"></i>정보수정</a>
+						<a href="javascript:void(0)" id="logout_btn" class="btn_menu"><i class="big grey power off icon"></i>로그아웃</a>
+					</c:when>
+				</c:choose>
+			</div>
+		</header>
+
+		<div id="logo-div">
+			<div id="logo-img">
+				<img src='<c:url value="/images/logo.png"/>' alt="로고" />
+			</div>
+		</div>
+
+		<div id="board-category">
+			<div id="category">
+
+				<button class="ui grey button" onclick="category_pagination(1, '')">전체</button>
+				<c:forEach var="category" items="${resultCategory }">
+					<button class="ui grey button"
+						onclick="category_pagination(1, '${category.cat_cname}');">
+						<c:out value='${category.cat_cname }' />
+					</button>
+				</c:forEach>
+			</div>
+		</div>
+
+		<div id="board-div">
+			<div id="board">
+				<input type="hidden" id="cp"
+					value="<c:out value='${paginationInfo.currentPageNo}'/>" /> <input
+					type="hidden" id="pageSize"
+					value="<c:out value='${paginationInfo.pageSize }' />" /> <input
+					type="hidden" id="totalPage"
+					value="<c:out value='${resultCnt/paginationInfo.recordCountPerPage}'/>" />
+				<input type="hidden" id="category_name"
+					value="<c:out value='${boardVO.cat_cname }'/>" />
+			<input type="hidden" id="rank" name="rank" value="${resultUserRank }" />
+				<table class="ui celled table">
+					<colgroup>
+						<col width="50px">
+						<col width="60px">
+						<col width="230px">
+						<col width="50px">
+						<col width="70px">
+						<col width="40px">
+					<c:if test="${resultUserRank eq 1 }">
+						<col width="10px">
+					</c:if>
+					</colgroup>
+					<thead>
+						<tr>
+							<th>번호</th>
+							<th>카테고리</th>
+							<th>제목</th>
+							<th>작성자</th>
+							<th>날짜</th>
+							<th>조회수</th>
+						<c:if test="${resultUserRank eq 1 }">
+							<th id="allCheck-th"><input type="checkbox" name="" id="allCheck" onclick="javascript:allCheck()" /></th>
+						</c:if>	
+						</tr>
+					</thead>
+					
+					<tr id="tr-async1" class="tr-async" ></tr>
+					<tr id="tr-async2" class="tr-async" ></tr>
+					<tr id="tr-async3" class="tr-async" ></tr>
+					<tr id="tr-async4" class="tr-async" ></tr>
+					<tr id="tr-async5" class="tr-async" ></tr>
+					<tr id="tr-async6" class="tr-async" ></tr>
+				</table>
+				<c:if test="${resultUserRank eq 1 }">
+					<a href="javascript:void(0)" class="btn_menu" onclick="javascript:deleteList();" style="float: right; margin-left: 10px;"><i class="grey big trash alternate icon"></i>삭제</a>
+				</c:if>
+					<a href="javascript:void(0)" class="btn_menu" onclick="javascript:addList();" id="addList" style="float: right;"><i class="grey big plus circle icon"></i>게시글 추가</a>
+				<div id="pagination">
+					
+				</div>
+				<div>
+				</div>
+
+			</div>
+		</div>
+
+		<!-- 게시글 상세보기 모달창 시작	 -->
+
+		<div class="modal_board hidden">
+			<div class="modal__overlay"></div>
+			<div class="modal__content">
+
+				<h2 id="center">게시판 상세내용</h2>
+				<br>
+				<table class="modal_table">
+					<tr style="display: none;">
+						<th bgcolor="#C0D6E4" style="height: 33px;">번호</th>
+						<th style="text-align: left;" colspan="2" id="post_pnum"></th>
+					</tr>
+					<tr>
+						<th bgcolor="#C0D6E4" style="height: 33px;">작성일</th>
+						<th style="text-align: left;" colspan="2" id="post_regdate"></th>
+					</tr>
+					<tr>
+						<th bgcolor="#C0D6E4" style="height: 33px;">작성자</th>
+						<th style="text-align: left;" colspan="2" id="user_id"></th>
+					</tr>
+					<tr>
+						<th bgcolor="#C0D6E4" style="height: 33px;">제목</th>
+						<th style="text-align: left;" colspan="2" id="post_title"></th>
+					</tr>
+					<tr>
+						<th bgcolor="#C0D6E4" style="height: 200px; width: 100px;">내용</th>
+						<th style="width: 100px" id="post_img"></th>
+						<th style="text-align: left;" id="post_contents"></th>
+					</tr>
+					<tr>
+						<th bgcolor="#C0D6E4" style="height: 33px;">첨부파일</th>
+						<th style="text-align: left;" colspan="2" id="post_file"></th>
+					</tr>
+				</table>
+				<br>
+				<div id="center" class="post_like">
+					<button>👍</button>
+				</div>
+				<br>
+				<div id="center">
+					<button>수정</button>
+					<button>삭제</button>
+					<button onclick="closeModal();">목록</button>
+				</div>
+				<hr>
+
+				comment <br>
+
+				<textarea id="rep_contents" placeholder="댓글을 작성하세요." rows="2"
+					cols="60"></textarea>
+				<button onclick="replyInsertBtn($('#post_pnum')[0].innerText);">댓글작성</button>
+
+				<br>
+				<br>
+				
+<!-- 				댓글 달기 -->
+				<table class="modal_table">
+					<tr>
+						<th bgcolor="#C0D6E4" style="width: 80px; height: 25px;">댓글 번호 </th>
+						<th style="width: 80px;"></th>
+						<th bgcolor="#C0D6E4" style="width: 80px; height: 25px;">작성자 </th>
+						<th style="width: 80px;"></th>
+						<th bgcolor="#C0D6E4" style="width: 80px; height: 25px;">작성일 </th>
+						<th style="width: 80px;"></th>
+					</tr> 
+					<tr>
+						<th bgcolor="#C0D6E4" style="width: 80px; height: 50px;">내용 </th>
+					</tr>
+				</table>
+				<button>수정</button><button>삭제</button>
+				<br>
+<!-- 				댓글달기 끝 -->
+				<div>
+				<c:if test="${resultUserRank eq 1 }">
+					<input type="button" value="삭제" style="float: right;" onclick="javascript:deleteList()"/>
+				</c:if>
+					<input type="button" value="작성" style="float: right; margin-right: 10px;" />
+				</div>
+				
+			</div>
+		</div>
+		<!-- 게시글 상세보기 모달창 끝	 -->
+
+	</div>
+	<div id="modal_back">
+		<div id="wrap">
+			<div id="header">
+            <h1>사용자 정보수정</h1>
+        </div>
+        <form name = "updateUser" id="frm_update">
+	        <div class="ui form success error">
+		            <div id="main_left">
+		                <div class="field" id="image_field">
+		                    <label>대표 이미지</label>
+		                    <label for="uploadFile" id="image_field_upload">업로드</label>
+		                    <input type="file" id="uploadFile" accept="image/jpeg, image/jpg, image/png" name="uploadFile" onchange="toBase64(event);">
+	                    	<%-- <c:if test="">
+	                    		<img class="thumb" src="<c:url value='/'/>images/라이언 사진.png" style="width: 100px; height: 100px;">
+	                    	</c:if> --%>
+	                    	<img class="thumb" src="" id="img" style="width: 100px; height: 100px;">
+	                    	<a href="javascript:void(0);" class="dellink">파일 삭제</a>
+	                    	<input type="hidden" id="user_img" name="user_img" >
+		                </div>
+		            </div>
+		
+		            <div id="main_right">
+		                <div class="field">
+		                    <label>아이디</label>
+		                    <input id="inputID" type="text" name="user_id" value="${Session_user_id}" readonly>
+		                </div>
+		
+		                <div class="field">
+		                    <label>이름</label>
+		                    <input type="text" id="user_name" name="user_name" readonly>
+		                </div>
+		    
+		                <div class="field">
+		                    <label>비밀번호 *</label>
+		                    <input type="password" id="user_pw" name="user_pw">
+		                </div>
+		    
+		                <div class="field">
+		                    <label>이메일</label>
+							<input type="email" id="user_email" name="user_email" >  
+		                </div>
+		
+		                <div class="field">
+		                    <label>전화번호</label>
+		                    <input type="text" id="user_pnum" name="user_pnum" >
+		                </div>
+		                <br><p>* 비밀번호를 정확히 입력하여야 수정 가능.</p>
+		                
+		                <div class="field">
+		                	<label style="display: none;">생년월일</label>  
+		                	<input type="hidden" id="user_birth" name="user_birth" />
+		                </div>
+		               	<input type="hidden" id="user_rank" name="user_rank" />
+		            </div>
+	        </div>
+        	<div class="clear"></div>
+		</form>
+	        <div id="footer">
+	            <button id="updateUser_btn" type="button"  class="ui button">수정</button>
+	            <button id="update_cancel_btn" onClick="closeModal();" class="ui button">취소</button>
+	        </div>
+		</div>  
+	</div>
+</body>
+</html>

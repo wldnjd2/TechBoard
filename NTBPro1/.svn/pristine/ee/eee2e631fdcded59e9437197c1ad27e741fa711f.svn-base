@@ -1,0 +1,136 @@
+package kr.co.negga.ntb;
+
+import java.io.Console;
+import java.util.HashMap;
+import java.util.List;
+
+import javax.annotation.Resource;
+import javax.jms.Session;
+import javax.servlet.http.HttpSession;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.fasterxml.jackson.core.sym.Name;
+
+import egovframework.rte.ptl.mvc.tags.ui.pagination.PaginationInfo;
+import kr.co.negga.ntb.account.service.AccountService;
+import kr.co.negga.ntb.account.service.AccountVO;
+import kr.co.negga.ntb.board.service.BoardService;
+import kr.co.negga.ntb.board.service.BoardVO;
+
+@Controller
+public class MainController {
+	
+	@Resource(name = "boardService")
+	private BoardService service;
+	
+	@Resource(name = "accountService")
+	private AccountService acservice;
+
+	@RequestMapping(value = "/main.do", method = RequestMethod.GET)
+	public String main(@ModelAttribute("boardVO") BoardVO vo, 
+				@ModelAttribute("accountVO") AccountVO avo, HttpSession session,
+					Model model) throws Exception{
+			try {
+				vo.setPageUnit(5);
+				vo.setPageSize(10);
+				
+				PaginationInfo paginationInfo = new PaginationInfo();
+				
+				// 총 게시물 갯수
+				int totCnt = service.selectListCnt(vo);
+				paginationInfo.setTotalRecordCount(totCnt);
+				// 한 페이지에 게시되는 게시글 건수
+				paginationInfo.setRecordCountPerPage(vo.getPageUnit());
+				// 페이지 리스트에 게시되는 페이지 건수
+				paginationInfo.setPageSize(vo.getPageSize());
+				// 한 페이지당 게시되는 게시글 건수
+				vo.setRecordCountPerPage(paginationInfo.getRecordCountPerPage());
+				
+				// 현재 페이지 번호
+				paginationInfo.setCurrentPageNo(vo.getPageIndex());
+				// SQL문 조건절 시작 rownum
+				vo.setFirstIndex(paginationInfo.getFirstRecordIndex());
+				// SQL문 조건절 끝 rownum
+				vo.setLastIndex(paginationInfo.getLastRecordIndex());
+				
+				// 게시글 불러오기
+				List<BoardVO> resultList = service.selectList(vo);
+				
+				// 카테고리 불러오기
+				List<BoardVO> resultCategory = service.selectCategory(vo);
+				model.addAttribute("resultList", resultList);
+				model.addAttribute("resultCnt", totCnt);
+				model.addAttribute("boardVO", vo);
+				model.addAttribute("paginationInfo", paginationInfo);
+				model.addAttribute("resultCategory", resultCategory);
+				
+				
+			} catch (Exception e) {
+				// TODO: handle exception
+				
+			}
+			//개인정보 수정(회원 정보)
+			String userID = (String)session.getAttribute("Session_user_id");
+			
+			List<AccountVO> AVO = acservice.selectMember(userID);
+			
+			model.addAttribute("MemberVO", AVO);
+			
+			return "main";
+	}
+	
+	@RequestMapping(value = "/main.do", method = RequestMethod.POST)
+	@ResponseBody
+	public HashMap<String, Object> list(@ModelAttribute("boardVO") BoardVO vo) throws Exception {
+		
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+		
+		vo.setPageUnit(5);
+		vo.setPageSize(10);
+		
+		PaginationInfo paginationInfo = new PaginationInfo();
+		
+		// 한 페이지에 게시되는 게시글 건수
+		paginationInfo.setRecordCountPerPage(vo.getPageUnit());
+		// 페이지 리스트에 게시되는 페이지 건수
+		paginationInfo.setPageSize(vo.getPageSize());
+		// 한 페이지당 게시되는 게시글 건수
+		vo.setRecordCountPerPage(paginationInfo.getRecordCountPerPage());
+		
+		// 현재 페이지 번호
+		paginationInfo.setCurrentPageNo(vo.getCurrentPage());
+		// SQL문 조건절 시작 rownum
+		vo.setFirstIndex(paginationInfo.getFirstRecordIndex());
+		// SQL문 조건절 끝 rownum
+		vo.setLastIndex(paginationInfo.getLastRecordIndex());
+	
+		if(vo.getCat_cname() != "") {
+			int cat_totCnt = service.selectListCnt(vo);
+			paginationInfo.setTotalRecordCount(cat_totCnt);
+			resultMap.put("resultCnt", cat_totCnt);
+		}else {
+			int totCnt = service.selectListCnt(vo);
+			paginationInfo.setTotalRecordCount(totCnt);
+			resultMap.put("resultCnt", totCnt);
+		}
+		
+			
+		List<BoardVO> resultList = service.selectList(vo);
+
+		resultMap.put("resultList", resultList);
+		resultMap.put("boardVO", vo);
+		resultMap.put("paginationInfo", paginationInfo);		
+		
+
+		return resultMap;
+	}
+
+}

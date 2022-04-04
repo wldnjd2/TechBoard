@@ -1,0 +1,74 @@
+@charset "UTF-8";
+
+	.closeBtn{
+		background: silver;
+		padding: 5px 10px;
+		border-radius: 4px;
+		cursor: pointer;
+		float : right;
+	}
+	
+	.modal {
+		position: fixed;
+		top : 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		display: none;
+		justify-content: center;
+		align-items: center;
+	}
+	
+	.modal .bg {
+          width: 100%;
+          height: 100%;
+          background-color: rgba(0, 0, 0, 0.6);
+        }
+
+     .modalBox {
+      	  position: absolute;
+          background-color: #fff;
+          width: 1000px;
+          height: 600px;
+          padding: 15px;
+        }
+
+     .modalBox button {
+          display: block;
+          width: 80px;
+          margin: 0 auto;
+        }
+	#manage{
+		width : 700px;
+		height: 400px;
+		margin : 0 auto;
+	}
+
+
+	#manage-tbl{
+		width : 550px;
+		height: 300px;
+		margin: 0 auto;
+	}
+	tr{
+		text-align: center;
+	}
+	#pagination_admin{
+		width : 50%;
+		height : 40px;
+		margin : 0 auto;
+		margin-top : 15px;
+		text-align: center;
+	}
+	.paging{
+		font-size: 25px;
+		margin-left: 5px;
+		text-decoration: none;
+	}
+	.paging:link{
+		color: black;
+	}
+	.paging:hover{
+		color: red;
+		cursor: pointer;
+	}	

@@ -1,0 +1,193 @@
+package kr.co.negga.ntb.board.web;
+import java.util.ArrayList;
+import static org.hamcrest.CoreMatchers.nullValue;
+
+import java.security.Provider.Service;
+import java.util.HashMap;
+import java.util.List;
+
+import javax.annotation.Resource;
+import javax.json.JsonArray;
+import javax.servlet.http.HttpSession;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+ 
+import kr.co.negga.ntb.board.service.BoardService;
+import kr.co.negga.ntb.board.service.BoardVO;
+
+@Controller
+public class BoardController {
+	
+	/* 
+	 * boardService 객체를 생성해줌
+	 */
+	@Resource(name = "boardService")
+	BoardService boardService;
+	
+
+	/* 
+	 *  게시판 게시글 하나 불러오기
+	 */
+	@RequestMapping(value = "/selectBoardDetail.do")
+	@ResponseBody 
+	public HashMap<String, Object> selectBoardDetail(@ModelAttribute("boardVO") BoardVO vo, HttpSession session) throws Exception{
+		HashMap<String, Object> map = new HashMap<String, Object>();	
+		
+//		댓글 작성자 아이디 세션에서 가져오기
+		String replyId=(String)session.getAttribute("Session_user_id");
+		vo.setUser_id(replyId);
+		
+		BoardVO resultVO =  boardService.selectBoardDetail(vo);	
+		
+		
+		BoardVO replyLikeShow = boardService.replyLikeShow(vo);
+			
+		
+		map.put("resultVO", resultVO);
+		map.put("replyLikeShow", replyLikeShow);
+		return map;			
+	}
+	
+	/* 
+	 *  게시판 게시글 수정
+	 */
+	@RequestMapping(value = "/updateBoardDetail.do")
+	@ResponseBody 
+	public HashMap<String, Object> updateBoardDetail(@ModelAttribute("boardVO") BoardVO vo) throws Exception{
+		HashMap<String, Object> map = new HashMap<String, Object>();	
+		
+		int resultVO =  boardService.updateBoardDetail(vo);	
+		
+		map.put("resultVO", resultVO);
+		return map;			
+	}
+	
+	/* 
+	 *  게시판 게시글 삭제
+	 */
+	@RequestMapping(value = "/deleteBoardDetail.do")
+	@ResponseBody 
+	public HashMap<String, Object> deleteBoardDetail(@ModelAttribute("boardVO") BoardVO vo) throws Exception{
+		HashMap<String, Object> map = new HashMap<String, Object>();	
+		
+		int resultVO =  boardService.deleteBoardDetail(vo);	
+		
+		map.put("resultVO", resultVO);
+		return map;			
+	}
+	
+	/* 
+	 *  DB에 댓글 추가
+	 */
+	@RequestMapping(value = "/insertBoardReply.do")
+	@ResponseBody 
+	public HashMap<String, Object> insertBoardReply(@ModelAttribute("boardVO") BoardVO vo, HttpSession session) throws Exception{
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		
+//		댓글 작성자 아이디 세션에서 가져오기
+		String replyId=(String)session.getAttribute("Session_user_id");
+		vo.setRep_user_id(replyId);
+		if (vo.getRep_rnum() == 0) {
+			vo.setRep_rnum(1);
+		}
+		
+		int insertBoardReply = boardService.insertBoardReply(vo);
+		
+ 		map.put("resultVO", insertBoardReply);
+		return map;			
+	}
+	
+
+	/*
+	 * 댓글 불러오기 
+	 */
+	@RequestMapping(value = "/selectBoardReplyList.do")
+	@ResponseBody 
+	public HashMap<String, Object> selectBoardReplyList(@ModelAttribute("boardVO") BoardVO vo, HttpSession session) throws Exception{
+		
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		
+		ArrayList<BoardVO> selectBoardReplyList = (ArrayList<BoardVO>) boardService.selectBoardReplyList(vo);
+		
+		//댓글 총 갯수 불러오기
+		int selectBoardReplyCount = boardService.selectBoardReplyCount(vo);
+		
+		map.put("resultVO", selectBoardReplyList);
+		map.put("resultVO_CNT", selectBoardReplyCount);
+		
+		return map;			
+	}
+	
+	/*
+	 * 댓글 수정 
+	 */
+	@RequestMapping(value = "/updateBoardReplyList.do")
+	@ResponseBody 
+	public HashMap<String, Object> updateBoardReplyList(@ModelAttribute("boardVO") BoardVO vo, HttpSession session) throws Exception{
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		
+		int updateBoardReplyList = boardService.updateBoardReplyList(vo);
+		
+		map.put("resultVO", updateBoardReplyList);
+		return map;			
+	}
+	
+	/*
+	 * 댓글 삭제
+	 */
+	@RequestMapping(value = "/deleteBoardReplyList.do")
+	@ResponseBody 
+	public HashMap<String, Object> deleteBoardReplyList(@ModelAttribute("boardVO") BoardVO vo, HttpSession session) throws Exception{
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		
+		int deleteBoardReplyList = boardService.deleteBoardReplyList(vo);
+		
+		map.put("resultVO", deleteBoardReplyList);
+		return map;			
+	}
+
+	
+	
+	/*
+	 * 게시글 좋아요 하기
+	 */
+	@RequestMapping(value = "/replyLikeAdd.do")
+	@ResponseBody 
+	public HashMap<String, Object> replyLikeAdd(@ModelAttribute("boardVO") BoardVO vo, HttpSession session) throws Exception{
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		
+//		댓글 작성자 아이디 세션에서 가져오기
+		String replyId=(String)session.getAttribute("Session_user_id");
+		vo.setUser_id(replyId);
+
+		int replyLikeAdd = boardService.replyLikeAdd(vo);
+		
+		
+		return map;			
+	}
+	
+	/*
+	 * 게시글 좋아요 취소
+	 */
+	@RequestMapping(value = "/replyLikeCancel.do")
+	@ResponseBody 
+	public HashMap<String, Object> replyLikeCancel(@ModelAttribute("boardVO") BoardVO vo, HttpSession session) throws Exception{
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		
+//		댓글 작성자 아이디 세션에서 가져오기
+		String replyId=(String)session.getAttribute("Session_user_id");
+		vo.setUser_id(replyId);
+		
+		int replyLikeCancel = boardService.replyLikeCancel(vo);
+		
+		map.put("resultVO", replyLikeCancel);
+		return map;			
+	}
+	
+	
+}

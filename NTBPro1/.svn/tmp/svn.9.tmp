@@ -1,0 +1,161 @@
+package kr.co.negga.ntb.account.web;
+
+
+import java.io.File;
+import java.util.UUID;
+
+import javax.annotation.Resource;
+
+import org.apache.commons.io.FilenameUtils;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+
+import kr.co.negga.ntb.account.service.AccountService;
+import kr.co.negga.ntb.account.service.AccountVO;
+import kr.co.negga.ntb.account.service.SHA256Util;
+import kr.co.negga.ntb.login.service.LoginService;
+
+
+/**
+ * @Class AccountController.java
+ * @Description 회원 관련 컨트롤러 구현 Class
+ * @Since 2022.03.17
+ * @author jshan
+ * @version 1.0
+ * @Modification 수정사항 없음 
+ */
+
+@Controller
+@RequestMapping("/account/*")
+public class AccountController {
+
+	@Resource(name="accountService")
+	public AccountService accountService;
+	
+	@Resource(name="loginService")
+	public LoginService loginService;
+	
+	/**
+	 * 회원가입 페이지를 불러온다.
+	 * @return 회원가입 Page
+	 * @exception Exception
+	 */
+	@RequestMapping(value = "/insertUser.do", method = RequestMethod.GET)
+	public String InsertUser() throws Exception{
+		
+		return "/account/insertUser";
+	}
+	
+
+	
+	/**
+	 * 회원가입 insert를 한다.
+	 * @return 회원가입 Page
+	 * @exception Exception
+	 */
+	@ResponseBody
+	@RequestMapping(value = "/insertUserWrite.do", method = RequestMethod.POST)
+	public String InsertUserDB(AccountVO avo) throws Exception {
+		String message = "";
+		
+		// 파일 업로드 처리
+        String fileName = null;
+        MultipartFile uploadFile = avo.getUploadFile();
+        if (!uploadFile.isEmpty()) {
+            String originalFileName = uploadFile.getOriginalFilename();
+            String ext = FilenameUtils.getExtension(originalFileName); // 확장자 구하기
+            UUID uuid = UUID.randomUUID(); // UUID 구하기
+            fileName = uuid + "." + ext;
+//            uploadFile.transferTo(new File("C:\\Users\\HyeonBae\\Downloads\\eGovFrameDev-3.10.0-64bit\\workspace\\NTBPro1\\src\\main\\webapp\\images\\" + fileName));
+            uploadFile.transferTo(new File("D:\\NTBPro1\\Images\\" + fileName));
+        }
+        avo.setUser_img(fileName);
+		
+        //생년월일 처리
+		String dateStr = (avo.getUser_year()+"-"+avo.getUser_month()+"-"+avo.getUser_day());
+		avo.setUser_birth(dateStr);
+		
+		// 개인 계정 솔트값 생성
+		String salt = SHA256Util.generateSalt();
+		avo.setUser_salt(salt);
+		
+		// 개인 계정 password 암호화
+		String user_pw = avo.getUser_pw();
+		user_pw = SHA256Util.getEncrypt(user_pw, salt);
+		
+		avo.setUser_pw(user_pw);
+		
+	    int result = accountService.insertMember(avo);
+	    
+	    if(result == 1){
+	    	message = "ok";
+	    }
+	    return message;
+	}
+	
+	/*
+	 * 회원 정보 업데이트
+	 */
+	@RequestMapping(value = "/updateUserWrite.do", method = RequestMethod.POST)
+	@ResponseBody
+	public String updateUserDB(AccountVO avo) throws Exception {
+		String message = "";
+		
+		// 파일 업로드 처리
+        String fileName = null;
+        MultipartFile uploadFile = avo.getUploadFile();
+        if (!uploadFile.isEmpty()) {
+            String originalFileName = uploadFile.getOriginalFilename();
+            String ext = FilenameUtils.getExtension(originalFileName); // 확장자 구하기
+            UUID uuid = UUID.randomUUID(); // UUID 구하기
+            fileName = uuid + "." + ext;
+            uploadFile.transferTo(new File("C:\\Users\\HyeonBae\\Downloads\\eGovFrameDev-3.10.0-64bit\\workspace\\NTBPro1\\src\\main\\webapp\\images\\" + fileName));
+        }
+        avo.setUser_img(fileName);
+		
+		// 유저 고유 솔트값 해시 처리해서 비교 데이터 만들기
+		String salt = loginService.selectUserSalt(avo.getUser_id());
+		String hash_pw = SHA256Util.getEncrypt(avo.getUser_pw(), salt);
+		
+		avo.setUser_pw(hash_pw);
+		
+		int count = accountService.selectUserPass(avo.getUser_pw());
+		int result = accountService.userUpdate(avo);
+	    
+		if(count == 1) {
+			if(result == 1) {
+				message = "ok";
+			}else {
+				message = "notOk";
+			}
+		} else {
+			message = "notOk";
+		}
+		
+		return message;
+	}
+	
+	/*
+	 * ID 중복체크
+	 */
+	@RequestMapping(value = "/idcheck.do", method = RequestMethod.POST)
+	@ResponseBody
+	public String selectIdCheck(String user_id) throws Exception{
+		
+			String message = "";
+			
+			int count = accountService.selectIdCheck(user_id);
+			
+			if(count == 0) {
+				message = "ok";
+			}else {
+				message = "not ok";
+			}
+			
+		return message;
+	}
+	
+}

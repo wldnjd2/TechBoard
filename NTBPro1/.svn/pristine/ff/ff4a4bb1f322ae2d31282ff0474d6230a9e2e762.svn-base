@@ -1,0 +1,60 @@
+/* 공통 부분 시작 */
+*{
+    margin: 0px;
+    padding: 0px;
+}
+body{
+    width: 1024px;
+    margin: auto;
+}
+#wrap{
+    padding: 50px 100px 0px 100px;
+}
+.clear{
+    clear: both;
+}
+/* 공통 부분 종료 */
+
+/* header 부분 시작 */
+#header{
+    padding-bottom: 50px;
+    text-align: center;
+}
+/* header 부분 종료 */
+
+/* main_left 부분 시작 */
+#main_left{
+    margin-right: 50px;
+    width: 200px;
+    float: left;
+}
+#img_btn{
+    margin-top: 10px;
+}
+/* main_left 부분 종료 */
+
+/* main_right 부분 시작 */
+#main_right{
+    width: 550px;
+    float: left;
+}
+.message{
+    display: none;
+}
+.none{
+    display: none;
+}
+#inputID{
+    width: 440px;
+}
+.fr{
+    float: right;
+}
+/* main_right 부분 종료 */
+
+/* footer 부분 시작*/
+#footer{
+    margin: 30px 0 30px 0;
+    text-align: center;
+}
+/* footer 부분 종료*/

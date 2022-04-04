@@ -1,0 +1,111 @@
+<%@ page contentType="text/html; charset=utf-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="ui" uri="http://egovframework.gov/ctl/ui"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%>
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.2/semantic.min.css" rel="stylesheet" type="text/css">
+	<link href="<c:url value='/'/>css/logIn.css" rel="stylesheet" type="text/css" >
+	<title>로그인</title>
+	
+	<script
+	  src="https://code.jquery.com/jquery-3.1.1.min.js"
+	  integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+	  crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.2/semantic.min.js"></script>
+	
+	
+	<script type="text/javascript" src="http://www-cs-students.stanford.edu/~tjw/jsbn/rsa.js"></script>
+	<script type="text/javascript" src="http://www-cs-students.stanford.edu/~tjw/jsbn/jsbn.js"></script>
+	<script type="text/javascript" src="http://www-cs-students.stanford.edu/~tjw/jsbn/prng4.js"></script>
+	<script type="text/javascript" src="http://www-cs-students.stanford.edu/~tjw/jsbn/rng.js"></script>
+	
+	<script>
+		$(function(){
+			$("#btn_submit").click(function(){
+				
+				var user_id = $("#user_id");
+				var user_pw = $("#user_pw");
+				var user_id_real = $("#USER_ID");
+				var user_pw_real = $("#USER_PW");
+				
+				/*아이디 비밀번호 작성 완료했는지 확인 하는 부분*/
+				if(user_id.val() == ""){
+					alert("아이디를 입력해주세요.");
+					$("#user_id").focus();
+					return false;
+				}
+				if(user_pw.val() == ""){
+					alert("암호를 입력해주세요.");
+					$("#user_pw").focus();
+					return false;
+				}
+				
+				// rsa 암호화
+		        var rsa = new RSAKey();
+		        rsa.setPublic($('#RSAModulus').val(),$('#RSAExponent').val());
+		        
+		        user_id_real.val(rsa.encrypt($.trim(user_id.val())));
+		        user_pw_real.val(rsa.encrypt($.trim(user_pw.val())));
+		        
+		        user_id.val("");
+		        user_pw.val("");
+		        
+				/*모든 정보를 입력했으면 로그인 되는 부분*/
+				$.ajax({
+					type: "POST",
+					data: "user_id_real="+user_id_real.val()+"&user_pw_real="+user_pw_real.val(),	// json(전송) 타입
+					url: "${pageContext.request.contextPath}/login/loginWriteSub.do",
+					dataType: "text",	//리턴 타입
+					
+					success: function(result){
+						if(result == "ok"){
+							location="${pageContext.request.contextPath}"	//로그인 후 화면 설정
+						} else{
+							alert("로그인 정보를 다시 확인해주세요.");
+						}
+					},
+					error: function(){	//장애 발생
+						alert("오류발생");
+					}
+				});
+			});
+		});
+	</script>
+</head>
+<body>
+	<div id="wrap">
+		<div id="header">
+			<h1>로그인</h1>
+		</div>
+		<div id="main">
+			<form class="ui form" name="loginFrm" method="POST">
+				<div class="field">
+					<input type="hidden" id="RSAModulus" value="${RSAModulus}"/>
+    				<input type="hidden" id="RSAExponent" value="${RSAExponent}"/>
+					<label>아이디</label>
+					<div class="ui left icon input">
+						<input type="text" placeholder="UserID" id="user_id"> <i class="user icon"></i>
+					</div>
+				</div>
+				<div class="field">
+					<label>비밀번호</label>
+					<div class="ui left icon input">
+						<input type="password" id="user_pw"> <i class="lock icon"></i>
+					</div>
+					<input type="hidden" id="USER_ID" name="USER_ID">
+       				<input type="hidden" id="USER_PW" name="USER_PW">
+				</div>
+
+			</form>
+		</div>
+		<div id="footer">
+			<button id="btn_submit" class="ui button" type="submit">로그인</button>
+			<a class="ui button" href="/NTBPro1/account/insertUser.do">회원가입</a>
+		</div>
+	</div>
+</body>
+</html>

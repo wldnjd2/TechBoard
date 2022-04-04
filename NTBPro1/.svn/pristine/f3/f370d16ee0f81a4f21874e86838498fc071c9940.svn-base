@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="kr.co.negga.ntb.board.service.impl.BoardMapper">
+	<select id="selectList" parameterType="boardVO" resultType="boardVO">
+		select tbb.*
+		from(
+			select (row_number() over()) AS rn, tb.*
+			from(
+				SELECT
+					n.post_pnum,
+					n.post_regdate,
+					n.post_title,
+					n.post_contents,
+					n.post_img,
+					n.post_file,
+					n.post_fname,
+					n.post_like,
+					n.post_hits,
+					n.user_id,
+					n.cat_cname
+				from
+					ntb_post n
+				order by 
+					post_pnum desc
+				)tb
+				
+		<if test="cat_cname != null and cat_cname != '' ">
+			where cat_cname = #{cat_cname}
+		</if>	
+			order by
+				rn asc
+			)tbb
+		where rn between #{firstIndex} +1 and #{firstIndex} + #{recordCountPerPage}
+	</select>
+
+	<select id="selectListCnt" parameterType="boardVO" resultType="int">
+		SELECT
+			count(*)
+		FROM
+			ntb_post
+		<if test="cat_cname != null and cat_cname != '' ">
+		WHERE
+			cat_cname = #{cat_cname}
+		</if>
+	</select>
+	
+	<select id="selectCategory" parameterType="boardVO" resultType="boardVO">
+		SELECT
+			cat_cname
+		FROM
+			ntb_category
+	</select>
+	
+<!-- 	게시판 게시글 하나 불러오기 -->
+	<select id="selectBoardDetail" parameterType="boardVO" resultType="boardVO">
+		SELECT 
+				post_pnum,
+				post_regdate,
+				post_title,
+				post_contents,
+				post_img,
+				post_file,
+				post_fname,
+				post_like,
+				post_hits,
+				user_id,
+				cat_cname
+				
+		FROM
+				ntb_post
+		WHERE
+				post_pnum = #{post_pnum}
+				
+	</select>
+	
+<!--      게시판 게시글 수정 -->
+	<select id="updateBoardDetail" parameterType="boardVO" resultType="boardVO">
+		update 
+			ntb_post 
+		set 
+			post_title = #{post_title}, 
+			post_contents = #{post_contents}, 
+			post_img = #{post_img}, 
+			post_file = #{post_file} 
+		where 
+			post_pnum =#{post_pnum}
+				
+	</select>
+	
+<!-- 	   게시판 게시글 삭제 -->
+	<select id="deleteBoardDetail" parameterType="boardVO" resultType="boardVO">
+		delete 
+			from ntb_post 
+		where 
+			post_pnum = #{post_pnum}
+	</select>
+	
+<!-- 	  댓글 정보 DB에 추가		-->
+	<insert id="insertBoardReply" parameterType="boardVO" > 
+		<selectKey resultType = "int" keyProperty="rep_rnum" order="BEFORE">
+			SELECT COALESCE(max(rep_rnum),0)+1 from ntb_reply
+		</selectKey>
+	
+		INSERT INTO ntb_reply 
+			(
+			rep_rnum 
+			, rep_regdate
+			, rep_contents
+			, post_pnum
+			, user_id
+			)
+			
+		VALUES 
+			(
+<!-- 			아래와 같이 코딩하면 중간에 값 변형 될 수 도 있음 -->
+<!-- 			(select coalesce(max(rep_rnum),0)+1 from ntb_reply) -->
+			#{rep_rnum} 
+			, NOW()
+			, #{rep_contents}
+			, #{post_pnum}
+			, #{rep_user_id}
+			)
+    </insert>
+    
+    
+<!--     댓글 전체 불러오기 -->
+    <select id="selectBoardReplyList" parameterType="boardVO"  resultType="boardVO">
+    	select 
+    		rep_rnum, 
+    		rep_regdate,
+    		rep_contents, 
+    		post_pnum, 
+    		user_id
+    	from 
+    		ntb_reply
+    	where 
+    		post_pnum = #{post_pnum}
+    	order by 
+    		rep_rnum desc	
+    </select>
+    
+
+    
+<!--      댓글 수정하기 -->
+    <update id="updateBoardReplyList" parameterType="boardVO" >
+    	update 
+    		ntb_reply 
+    	set 
+    		rep_contents=#{rep_contents}
+    	where 
+    		post_pnum = #{post_pnum}
+    	and
+    		rep_rnum=#{rep_rnum}
+    </update>
+    
+<!--      댓글 삭제하기 -->
+    <delete id="deleteBoardReplyList" parameterType="boardVO">
+    	delete
+    	from 
+    		ntb_reply 
+    	where 
+    		rep_rnum=#{rep_rnum}
+    	and 
+    		post_pnum = #{post_pnum}
+    </delete>
+    
+<!--      댓글 총 갯수 불러오기 -->
+    <select id="selectBoardReplyCount" parameterType="boardVO"  resultType="int">
+    	select 
+    		count(*) as rep_cnt
+    	from 
+    		ntb_reply 
+    	where 
+    		post_pnum =#{post_pnum}    
+    </select>
+    
+    <!-- 	좋아요  1로 바꾸기		-->
+	<insert id="replyLikeAdd" parameterType="boardVO"> 
+		insert into 
+			ntb_like
+		values 
+			( #{user_id}, #{post_pnum})
+    </insert>
+    
+    <!-- 	좋아요 0으로 바꾸기	-->
+	<delete id="replyLikeCancel" parameterType="boardVO"> 
+		delete from
+			ntb_like 
+		where 
+			user_id = #{user_id}
+		and 
+			post_pnum = #{post_pnum}
+
+    </delete>
+    
+    <!-- 	좋아요 불러오기	-->
+	<select id="replyLikeShow" parameterType="boardVO" resultType="boardVO"> 
+		select 
+			* 
+		from 
+			ntb_like 
+		where 
+			post_pnum = #{post_pnum}
+		and
+			user_id = #{user_id}
+    </select>
+    
+    <!-- 	게시글 마다 좋아요 개수 불러오기-->
+	<select id="selectReplyLikeCount" parameterType="boardVO" resultType="int"> 
+		select 
+			count(*) 
+		from 
+			ntb_like 
+		where 
+			post_pnum = #{post_pnum}
+    </select>
+    
+    <!-- 	싫어요  1로 바꾸기		-->
+	<insert id="replyHateAdd" parameterType="boardVO"> 
+		insert into 
+			ntb_hate
+		values 
+			( #{user_id}, #{post_pnum})
+    </insert>
+    
+    <!-- 	싫어요 0으로 바꾸기	-->
+	<delete id="replyHateCancel" parameterType="boardVO"> 
+		delete from
+			ntb_hate 
+		where 
+			user_id = #{user_id}
+		and 
+			post_pnum = #{post_pnum}
+
+    </delete>
+    
+    <!-- 	싫어요 불러오기	-->
+	<select id="replyHateShow" parameterType="boardVO" resultType="boardVO"> 
+		select 
+			* 
+		from 
+			ntb_hate 
+		where 
+			post_pnum = #{post_pnum}
+		and
+			user_id = #{user_id}
+    </select>
+    
+    <!-- 	게시글 마다 싫어요 개수 불러오기-->
+	<select id="selectReplyHateCount" parameterType="boardVO" resultType="int"> 
+		select 
+			count(*) 
+		from 
+			ntb_hate 
+		where 
+			post_pnum = #{post_pnum}
+    </select>
+
+    <!-- 	게시글 insert		-->
+    <insert id="insertTechList" parameterType="boardVO" >
+    	insert into ntb_post
+    	values(nextval('ntb_post_pnum_seq'), now(), #{post_title}, #{post_contents}, #{post_img}, null, null, 0, 0, #{user_id}, #{cat_cname})
+    </insert>
+
+</mapper>

@@ -1,0 +1,77 @@
+@charset "UTF-8";
+
+	.closeBtn{
+		background: silver;
+		padding: 5px 10px;
+		border-radius: 4px;
+		cursor: pointer;
+		float : right;
+	}
+
+	.bg_manageUser {
+		display: none; /* Hidden by default */
+		position: fixed; /* Stay in place */
+		z-index: 10; /* Sit on top */
+		left: 0;
+		top: 0;
+		width: 100%; /* Full width */
+		height: 100%; /* Full height */
+		overflow: auto; /* Enable scroll if needed */
+		background-color: rgb(0,0,0); /* Fallback color */
+		background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    }
+    .modalBox_manageUser {
+		position: fixed;
+		background-color: #FEFEFE;
+		top: calc(50% - 300px);
+		margin-left: calc(50% - 400px); /* 15% from the top and centered */
+		border: 1px solid #888;
+		width: 800px; /* Could be more or less, depending on screen size */
+		height: 600px;
+    }
+    #totalUser{
+    	margin-left: 50px;
+    	margin-top: 70px;
+    }
+
+    .modalBox button {
+          display: block;
+          width: 80px;
+          margin: 0 auto;
+    }
+        
+        
+	#manage{
+		width : 700px;
+		height: 400px;
+		margin : 0 auto;
+	}
+
+
+	#manage-tbl{
+		width : 550px;
+		height: 300px;
+		margin: 0 auto;
+	}
+	tr{
+		text-align: center;
+	}
+	#pagination_admin{
+		width : 50%;
+		height : 40px;
+		margin : 0 auto;
+		margin-top : 15px;
+		text-align: center;
+	}
+	.paging_admin{
+		font-size: 25px;
+		margin-left: 5px;
+		text-decoration: none;
+	}
+	.paging_admin:link{
+		color: black;
+	}
+	.paging_admin:hover{
+		color: red;
+		cursor: pointer;
+	}	

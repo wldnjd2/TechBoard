@@ -1,0 +1,177 @@
+package kr.co.negga.ntb.account.service;
+
+import org.springframework.web.multipart.MultipartFile;
+
+/**
+ * @Class AccountVO.java
+ * @Description 회원 정보 VO class
+ * @Since 2022.03.17
+ * @author jshan
+ * @version 1.0
+ * @Modification 수정사항 없음
+ */
+
+public class AccountVO {
+
+	/* 회원 아이디 */
+	private String user_id;
+	private String user_id_real;
+	/* 회원 이름 */
+	private String user_name;
+	/* 회원 비밀번호 */
+	private String user_pw;
+	private String user_pw_real;
+	/* 회원 이메일 */
+	private String user_email;
+	/* 회원 전화번호 */
+	private String user_pnum;
+	/* 회원 생년월일 */
+	private String user_birth;
+	/* 회원 생년/월/일 */
+	private String user_year;
+	private String user_month;
+	private String user_day;
+	
+	/* 회원 이미지 (경로 설정) */
+	private String user_img;
+	
+	/* 회원 등급 */
+	private int user_rank;
+	/* 회원 솔트 */
+	private String user_salt;
+
+	/////////////////////////////
+	// 기타					   //
+	/////////////////////////////	
+	
+	/** 현재페이지 */
+	private int currentPage = 1;
+	
+	/** 페이지당 레코드 개수 */
+	private int recordCountPerPage = 5;
+	
+	/** 페이지사이즈 */
+	private int pageSize = 10;
+	
+	/** 첫 페이지 인덱스 */
+	private int firstIndex = 1;
+	
+	/** 마지막페이지 인덱스 */
+	private int lastIndex = 1;
+	
+	
+	public String getUser_id_real() {
+		return user_id_real;
+	}
+	public void setUser_id_real(String user_id_real) {
+		this.user_id_real = user_id_real;
+	}
+	public String getUser_pw_real() {
+		return user_pw_real;
+	}
+	public void setUser_pw_real(String user_pw_real) {
+		this.user_pw_real = user_pw_real;
+	}
+	public String getUser_id() {
+		return user_id;
+	}
+	public void setUser_id(String user_id) {
+		this.user_id = user_id;
+	}
+	public String getUser_name() {
+		return user_name;
+	}
+	public void setUser_name(String user_name) {
+		this.user_name = user_name;
+	}
+	public String getUser_pw() {
+		return user_pw;
+	}
+	public void setUser_pw(String user_pw) {
+		this.user_pw = user_pw;
+	}
+	public String getUser_email() {
+		return user_email;
+	}
+	public void setUser_email(String user_email) {
+		this.user_email = user_email;
+	}
+	public String getUser_pnum() {
+		return user_pnum;
+	}
+	public void setUser_pnum(String user_pnum) {
+		this.user_pnum = user_pnum;
+	}
+	public String getUser_birth() {
+		return user_birth;
+	}
+	public void setUser_birth(String user_birth) {
+		this.user_birth = user_birth;
+	}
+	public String getUser_img() {
+		return user_img;
+	}
+	public void setUser_img(String image) {
+		this.user_img = image;
+	}
+	public int getUser_rank() {
+		return user_rank;
+	}
+	public void setUser_rank(int user_rank) {
+		this.user_rank = user_rank;
+	}
+	public String getUser_salt() {
+		return user_salt;
+	}
+	public void setUser_salt(String user_salt) {
+		this.user_salt = user_salt;
+	}
+	public String getUser_year() {
+		return user_year;
+	}
+	public void setUser_year(String user_year) {
+		this.user_year = user_year;
+	}
+	public String getUser_month() {
+		return user_month;
+	}
+	public void setUser_month(String user_month) {
+		this.user_month = user_month;
+	}
+	public String getUser_day() {
+		return user_day;
+	}
+	public void setUser_day(String user_day) {
+		this.user_day = user_day;
+	}
+	public int getPageSize() {
+		return pageSize;
+	}
+	public void setPageSize(int pageSize) {
+		this.pageSize = pageSize;
+	}
+	public int getFirstIndex() {
+		return firstIndex;
+	}
+	public void setFirstIndex(int firstIndex) {
+		this.firstIndex = firstIndex;
+	}
+	public int getLastIndex() {
+		return lastIndex;
+	}
+	public void setLastIndex(int lastIndex) {
+		this.lastIndex = lastIndex;
+	}
+	public int getRecordCountPerPage() {
+		return recordCountPerPage;
+	}
+	public void setRecordCountPerPage(int recordCountPerPage) {
+		this.recordCountPerPage = recordCountPerPage;
+	}
+	public int getCurrentPage() {
+		return currentPage;
+	}
+	public void setCurrentPage(int currentPage) {
+		this.currentPage = currentPage;
+	}
+}

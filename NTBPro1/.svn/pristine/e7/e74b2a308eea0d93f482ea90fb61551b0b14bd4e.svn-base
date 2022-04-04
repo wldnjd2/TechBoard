@@ -1,0 +1,73 @@
+@charset "UTF-8";
+	header{
+		width : 100%;
+		height : 50px;
+	}
+	#menu{
+		width : 500px;
+		height : 30px;
+		float : right;
+	}
+	.menu-btn{
+		width : 80px;
+		height : 40px;
+		margin-right: 20px;
+	}
+	#logo-div{
+		width : 100%;
+		height : 250px;
+	}
+	#logo-img{
+		width : 600px;
+		height : 200px;
+		margin : 0 auto;
+	}
+	#board-category{
+		width : 100%;
+		height : 70px;
+		
+	}
+	#category{
+		width : 700px;
+		height : 70px;
+		margin : 0 auto;
+		text-align: center;
+	}
+	.category-btn{
+		width : 80px;
+		height: 50px;
+		margin-right: 70px;
+	}
+	#board-div{
+		width : 100%;
+		height : 850px;
+		
+	}
+	#board{
+		width : 50%;
+		height: 700px;
+		margin : 0 auto;
+	}
+	#pagination{
+		width : 50%;
+		height : 40px;
+		margin : 0 auto;
+		margin-top : 15px;
+		text-align: center;
+	}
+	.paging{
+		font-size: 25px;
+		margin-left: 5px;
+		text-decoration: none;
+	}
+	.paging:link{
+		color: black;
+	}
+	.paging:hover{
+		color: red;
+		cursor: pointer;
+	}
+	.tr-sync:hover, .tr-async:hover{
+		background : silver;
+		cursor: pointer;
+	}

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="kr.co.negga.ntb.account.service.impl.AccountMapper">
+	<!-- select id="selectList" parameterType="boardVO" resultType="boardVO">
+		SELECT
+			post_pnum,
+			post_regdate,
+			post_title,
+			post_contents,
+			post_img,
+			post_file,
+			post_fname,
+			post_like,
+			post_hits,
+			user_id,
+			cat_cname
+		FROM
+			ntb_post
+	</select>-->
+	
+	<insert id="insertMember">
+		INSERT INTO ntb_member ( user_id,
+							    user_name,
+							    user_pw,
+							    user_email,
+							    user_pnum,
+							    user_birth,
+							    user_img,
+							    user_rank,
+							    user_salt)
+						VALUES (
+							    #{user_id},
+							    #{user_name},
+							    #{user_pw},
+							    #{user_email},
+							    #{user_pnum},
+							    #{user_birth},
+							    #{user_img},
+							    0,
+							    #{user_salt})
+	</insert>
+	
+	<select id="selectIdCheck" resultType="int">
+		SELECT COUNT(*) FROM ntb_member WHERE user_id =  #{user_id}
+	</select>
+	
+	<select id="selectMember" resultType="accountVO">
+		SELECT * FROM ntb_member WHERE user_id = #{user_id};
+	</select>
+	
+	<update id="userUpdate">
+		update ntb_member set 
+				user_id = #{user_id},
+				user_name = #{user_name},
+				user_pw = #{user_pw}, 
+				user_email = #{user_email}, 
+				user_pnum = #{user_pnum}, 
+				user_birth = #{user_birth},
+				user_img = #{user_img},
+				user_rank = #{user_rank}
+			WHERE 
+				user_id = #{user_id}
+				
+	</update>
+	
+	<select id="selectUserPass" resultType="int">
+		SELECT COUNT(*) FROM ntb_member WHERE user_pw = #{user_pw};
+	</select>
+
+	
+
+
+</mapper>

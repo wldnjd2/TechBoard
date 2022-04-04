@@ -1,0 +1,494 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>내가시스템 :: 기술게시판</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css" integrity="sha512-8bHTC73gkZ7rZ7vpqUQThUDhqcNFyYi2xgDgPDHc+GXVGHXq+xPjynxIopALmOPqzo9JZj0k6OqqewdGO3EsrQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<script
+  src="https://code.jquery.com/jquery-3.1.1.min.js"
+  integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+  crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js" integrity="sha512-dqw6X88iGgZlTsONxZK9ePmJEFrmHwpuMrsUChjAw1mRUhUITE5QU9pkcSox+ynfLhL15Sv2al5A0LVyDCmtUw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<link rel="stylesheet" href="<c:url value='css/main/main.css' />">
+<script src="<c:url value='js/main/tech_paging.js'/>"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.2/semantic.min.css" rel="stylesheet" type="text/css">
+<script
+      src="https://code.jquery.com/jquery-3.1.1.min.js"
+      integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+      crossorigin="anonymous"></script>
+<script src="Semantic-UI-CSS-master/semantic.min.js"></script>
+<style type="text/css">
+	#all_div{
+		z-index: 10;
+	}
+	/* 공통 부분 시작 */
+	#modal_back{
+		display: none; /* Hidden by default */
+		position: fixed; /* Stay in place */
+		z-index: 10; /* Sit on top */
+		left: 0;
+		top: 0;
+		width: 100%; /* Full width */
+		height: 100%; /* Full height */
+		overflow: auto; /* Enable scroll if needed */
+		background-color: rgb(0,0,0); /* Fallback color */
+		background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+	}
+	#wrap{
+		background-color: #fefefe;
+		margin: 15% auto; /* 15% from the top and centered */
+		padding: 20px;
+		border: 1px solid #888;
+		width: 40%; /* Could be more or less, depending on screen size */	
+	}
+	
+	.clear{
+	    clear: both;
+	}
+	/* 공통 부분 종료 */
+	
+	/* header 부분 시작 */
+	#header{
+	    padding-bottom: 50px;
+	    text-align: center;
+	}
+	/* header 부분 종료 */
+	
+	/* main_left 부분 시작 */
+	#main_left{
+	    margin: 0 50px 0 70px;
+	    width: 100px;
+	    float: left;
+	}
+	#img_btn{
+	    margin-top: 10px;
+	}
+	/* main_left 부분 종료 */
+	
+	/* main_right 부분 시작 */
+	#main_right{
+	    width: 350px;
+	    float: left;
+	}
+	.message{
+	    display: none;
+	}
+	.none{
+	    display: none;
+	}
+	.fr{
+	    float: right;
+	}
+	/* main_right 부분 종료 */
+	
+	/* footer 부분 시작*/
+	#footer{
+	    margin: 30px 0 30px 0;
+	    text-align: center;
+	}
+	/* footer 부분 종료*/
+</style>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script type="text/javascript">
+
+	/* 게시글 하단 페이징 처리 */
+	function pageMove(pageSize, cp, flag){
+		
+		
+		
+		/* 페이징에 필요한 변수 */
+		/* 현재 페이지 */
+		var currentPage = cp; 
+		/* 한번에 게시될 페이지 리스트 */
+		var size = pageSize;
+		/* 총 페이지 갯수*/
+		var tp = Math.ceil($("#totalPage").val());
+		/* 현재 페이지 리스트의 마지막 페이지 번호 */
+		var ep = Math.ceil(currentPage/size)*10;
+		/* 현재 페이지 리스트의 첫 페이지 번호 */
+		var sp = (ep-size)+1;
+		/* 기존 동기방식으로 구현했던 하단 페이징 부분 데이터를 지움*/
+		$("#pagination").empty();
+
+		/* 다음 페이지 버튼 클릭시 */
+		if (flag == 'next'){
+		/* 비동기방식으로 처리한 하단 페이징 부분 html코드를 담을 변수 */
+		var str = '';
+		/* '다음'버튼을 클릭했기 때문에 시작번호와 끝번호를 증가시켜준다.*/
+		sp += size; // 11
+		ep = sp+(size-1); // 20
+		/* sp를 현재페이지로 지정 */
+		currentPage = sp;
+				/* 끝페이지가 총 페이지보다 작다면 */
+				if(ep < tp){
+					
+					/* 시작페이지가 1이라면 '이전'버튼 안보이게*/
+					if(sp == 1){
+						
+						for(var i = sp; i <= ep; i++){
+							str += '<a class="paging" href="javascript:void(0)" onclick="javascript:pagination('+i+');">'+i+'</a>'
+						}
+						str += '<a href="javascript:void(0)" onclick="javascript:pageMove('+size+', '+currentPage+', \'next\' )">다음</a>'
+						
+					}else{
+						str += '<a href="javascript:void(0)" onclick="javascript:pageMove('+size+', '+currentPage+', \'pre\')">이전</a>'
+						for(var i = sp; i <= ep; i++){
+							str += '<a class="paging" href="javascript:void(0)" onclick="javascript:pagination('+i+');">'+i+'</a>'
+						}
+						str += '<a href="javascript:void(0)" onclick="javascript:pageMove('+size+', '+currentPage+', \'next\')">다음</a>'
+						
+					}
+				/* 그 외의 경우, 끝페이지가 총페이지보다 크거나 같을 때 */
+				}else{
+					/* 끝페이지번호를 총페이지로 번호로 설정  */
+					ep = tp;
+					for(var i = sp; i <= ep; i++){
+						str += '<a class="paging" href="javascript:void(0)" onclick="javascript:pagination('+i+');">'+i+'</a>'
+					}
+					str = '<a href="javascript:void(0)" onclick="javascript:pageMove('+size+', '+currentPage+', \'pre\')">이전</a>'+str;
+				}
+		/* 이전 페이지 */
+		}else if (flag == 'pre'){
+			/* 비동기방식으로 처리한 하단 페이징 부분 html코드를 담을 변수 */
+			var str = '';
+			/* 이전 버튼을 클릭했기 때문에 시작번호, 끝번호를 감소시켜준다*/
+			sp -= size;
+			ep = sp+(size-1);;
+			/* 현재 끝페이지를 현재페이지로 지정 */
+			currentPage = ep;
+				/* 시작페이지가 1이라면 이전버튼 안보이게*/
+				if(sp == 1){
+					for(var i = sp; i <= ep; i++){
+						str += '<a class="paging" href="javascript:void(0)" onclick="javascript:pagination('+i+');">'+i+'</a>'
+					}
+					str += '<a href="javascript:void(0)" onclick="javascript:pageMove('+size+', '+currentPage+', \'next\')">다음</a>'
+				}else{
+					str += '<a href="javascript:void(0)" onclick="javascript:pageMove('+size+', '+currentPage+', \'pre\')">이전</a>'
+					for(var i = sp; i <= ep; i++){
+						str += '<a class="paging" href="javascript:void(0)" onclick="javascript:pagination('+i+');">'+i+'</a>'
+					}
+					str += '<a href="javascript:void(0)" onclick="javascript:pageMove('+size+', '+currentPage+', \'next\')">다음</a>'
+				}
+			}
+			$("#pagination").html(str);
+			/* 다음 버튼을 누르면 다음 페이지의 데이터를 불러와야 함*/
+			if(cate == ''){
+				pagination(currentPage);
+			}else if(cate != ''){
+				pagination(currentPage, cate);
+			}
+	}
+	
+	/* 페이지 이동하면 데이터를 비동기 방식으로 불러오는 함수 */
+	function pagination(cp, category){
+		
+		
+		if(category != ''){
+			cate = category;
+		}else if(category == ''){
+			cate = '';
+		}
+		$.ajax({
+			url: "<c:url value='/main.do'/>",
+			type : 'POST',
+			data: { 'currentPage' : cp, 'cat_cname' : cate },
+			dataType: 'json',
+			success:function(data){
+				/* 기존의 동기방식으로 불러온 테이블의 데이터들을 비운다.*/
+				$(".tr-sync").empty();
+				var arr = [];
+				/* '<td>'+data.resultList[i].post_pnum+'</td>' */
+				for(var i = 0; i < data.resultList.length; i++){
+					arr[i] = '<td>'+data.resultList[i].post_pnum+'</td>'
+							+'<td>'+data.resultList[i].cat_cname+'</td>'
+							+'<td>'+data.resultList[i].post_title+'</td>'
+							+'<td>'+data.resultList[i].user_id+'</td>'
+							+'<td>'+data.resultList[i].post_regdate+'</td>'
+							+'<td>'+data.resultList[i].post_hits+'</td>'
+					
+				/* 비동기방식으로 불러온 데이터들로 테이블의 행들을 채운다 */
+					$("#tr-async"+(i+1)+"").html(arr[i])
+				}
+				
+			},
+			error:function(data){
+				alert("데이터를 불러오는 중 오류가 발생했습니다.")
+			}
+			
+		})
+		
+	}
+	
+	/* 카테고리 버튼 클릭했을 때 카테고리별 게시글 분류 */
+	function category_pagination(currentPage, categoryName){
+		$.ajax({
+			url : "<c:url value='/main.do'/>",
+			type : 'POST',
+			data: { 'currentPage' : currentPage, 'cat_cname' : categoryName },
+			dataType: 'json',
+			success:function(data){
+				
+				/* 페이징에 필요한 변수 */
+				/* 현재 페이지 */
+				var cp = currentPage; 
+				/* 한번에 게시될 페이지 리스트 */
+				var size = data.paginationInfo.pageSize;
+				/* 현재 페이지 리스트의 마지막 페이지 번호 */
+				var ep = Math.ceil(currentPage/size)*10;
+				/* 현재 페이지 리스트의 첫 페이지 번호 */
+				var sp = (ep-size)+1;
+				
+				/* 카테고리를 클릭했을 경우*/
+				if(data.boardVO.cat_cname != null){
+					
+					/* 카테고리명, 총 페이지 수 hidden 속성에 값 지정*/
+					$("#category_name").val(data.boardVO.cat_cname)
+					$("#totalPage").val(Number(data.resultCnt/data.paginationInfo.recordCountPerPage));
+					var str = '';
+					var cat_cname = data.boardVO.cat_cname;
+					var tp = Number(data.resultCnt/data.paginationInfo.recordCountPerPage);
+					
+					/* 끝페이지가 총 페이지보다 작다면 */
+					if(ep < tp){
+						for(var i = sp; i <= ep; i++){
+							str += '<a class="paging" href="javascript:void(0)" onclick="javascript:pagination('+i+', \''+cat_cname+'\');">'+i+'</a>'
+						}
+						str += '<a href="javascript:void(0)" onclick="javascript:pageMove('+size+', '+cp+', \'next\')">다음</a>'
+					/* 그 외의 경우, 끝페이지가 총페이지보다 크거나 같을 때  */
+					}else{
+						ep = tp
+						for(var i = sp; i <= ep; i++){
+							str += '<a class="paging" href="javascript:void(0)" onclick="javascript:pagination('+i+', \''+cat_cname+'\');">'+i+'</a>'
+						}
+					}
+					
+					pagination(1, cat_cname)
+				/* '전체' 버튼을 클릭했을 경우 */
+				}else{
+					var str = '';
+					var totalPage = Number(data.resultCnt/data.paginationInfo.recordCountPerPage);
+					$("#category_name").val('')
+					$("#totalPage").val(Number(data.resultCnt/data.paginationInfo.recordCountPerPage));
+					for(var i = sp; i <= ep; i++){
+						str += '<a class="paging" href="javascript:void(0)" onclick="javascript:pagination('+i+');">'+i+'</a>'
+					}
+					str += '<a href="javascript:void(0)" onclick="javascript:pageMove('+data.paginationInfo.pageSize+', '+data.boardVO.currentPage+', \'next\')">다음</a>'
+					
+					pagination(1)
+				}
+				$("#pagination").html(str);
+			}
+		})
+	}
+	
+	function closeModal() {
+		$('#modal_back').hide();
+	};
+	$(function(){
+		$("#login_btn").click(function(){
+			$(location).attr("href", "${pageContext.request.contextPath}/login/logIn.do");
+		});
+		
+		$("#logout_btn").click(function(){
+			$(location).attr("href", "${pageContext.request.contextPath}/login/logOut.do")
+		});
+		
+		$("#update_btn").click(function(){
+			$("#modal_back").css("display","block");
+		});
+		
+		/* 회원 정보 수정 */
+		$("#updateUser_btn").click(function(){
+			var formData = $("#frm_update").serialize();
+			
+			$.ajax({
+				type: "POST",
+				data: formData,	// json(전송) 타입
+				url: "${pageContext.request.contextPath}/account/updateUserWrite.do",
+				dataType: "text",	//리턴 타입
+				
+				success: function(result){
+					if(result == "ok"){
+						alert("회원정보 수정이 완료되었습니다.");
+						location="${pageContext.request.contextPath}"	//로그인 후 화면 설정
+					} else{
+						alert("회원정보 수정이 실패하였습니다.<br>(비밀번호를 한번 확인해주세요.");
+					}
+				},
+				error: function(){	//장애 발생
+					alert("오류발생");
+				}
+			});
+		});
+	});
+	
+	/* 게시글 클릭 시 상세정보로 이동 */
+	function moveToDetail(){
+		console.log("test")
+	}
+	
+	/* 관리자 버튼 */
+	function moveToAdmin(){
+		console.log("test")
+	}
+</script>
+</head>
+<body>
+	<div id="hi"></div>
+	<div id="all_div">
+	<header>
+		<div id="menu">
+			<c:choose>
+				<c:when test="${not empty Session_user_id}">
+					<button>${Session_user_id}</button>
+				</c:when>
+			</c:choose>
+			<input class="menu-btn" type="button" value="관리자" onclick="moveToAdmin()" />
+			
+			<c:choose>
+				<c:when test="${not empty Session_user_id}">
+					<input id="update_btn" class="menu-btn" type="button" value="정보수정" />
+					<input id="logout_btn" class="menu-btn" type="button" value="로그아웃"/>
+				</c:when>
+				<c:otherwise>
+					<input id="login_btn" class="menu-btn" type="button" value="로그인" />
+				</c:otherwise>
+			</c:choose>
+		</div>
+	</header>
+	
+	<div id="logo-div">
+		<div id="logo-img">
+			<img src='<c:url value="/images/logo.png"/>' alt="로고" />
+		</div>
+	</div>
+	
+		<div id="board-category">
+			<div id="category">
+		
+				<button class="ui grey button" onclick="category_pagination(1)">전체</button>
+				<c:forEach var="category" items="${resultCategory }">
+					<button class="ui grey button" onclick="category_pagination(1, '${category.cat_cname}');"><c:out value='${category.cat_cname }'/></button>
+				</c:forEach>
+			</div>
+		</div>
+		
+	<div id="board-div">
+		<div id="board">
+		<input type="hidden" id="cp" value="<c:out value='${paginationInfo.currentPageNo}'/>" />
+		<input type="hidden" id="pageSize" value="<c:out value='${paginationInfo.pageSize }' />" />
+		<input type="hidden" id="totalPage" value="<c:out value='${resultCnt/paginationInfo.recordCountPerPage}'/>"/>			
+		<input type="hidden" id="category_name" value="<c:out value='${boardVO.cat_cname }'/>"/>			
+			<table class="ui celled table">
+				<colgroup>
+					<col width="50px">
+					<col width="60px">
+					<col width="230px">
+					<col width="50px">
+					<col width="70px">
+					<col width="40px">
+				</colgroup>
+				<thead>
+					<tr>
+						<th>번호</th>
+						<th>카테고리</th>
+						<th>제목</th>
+						<th>작성자</th>
+						<th>날짜</th>
+						<th>조회수</th>
+					</tr>
+				</thead>
+				<c:forEach var="result" items="${resultList }" >
+					<tr class="tr-sync" onclick="moveToDetail();">
+						<td data-label="번호"><c:out value="${result.post_pnum }" /></td>
+						<td data-label="카테고리"><c:out value="${result.cat_cname }"/></td>
+						<td data-label="제목"><c:out value="${result.post_title }"/></td>
+						<td data-label="작성자"><c:out value="${result.user_id }"/></td>
+						<td data-label="날짜"><c:out value="${result.post_regdate }"/></td>
+						<td data-label="조회수"><c:out value="${result.post_hits }"/></td>
+					</tr>
+				</c:forEach>
+				<tr id="tr-async1" class="tr-async" onclick="moveToDetail();"></tr>
+				<tr id="tr-async2" class="tr-async" onclick="moveToDetail();"></tr>
+				<tr id="tr-async3" class="tr-async" onclick="moveToDetail();"></tr>
+				<tr id="tr-async4" class="tr-async" onclick="moveToDetail();"></tr>
+				<tr id="tr-async5" class="tr-async" onclick="moveToDetail();"></tr>
+				<tr id="tr-async6" class="tr-async" onclick="moveToDetail();"></tr>
+			</table>
+			<div id="pagination">
+				<c:forEach var="pageNum" begin="1" end="${paginationInfo.pageSize }">
+					<a class="paging" href="javascript:void(0)" onclick="javascript:pagination(${pageNum});"><c:out value="${pageNum }"/></a>
+				</c:forEach>
+					<a href="javascript:void(0)" onclick="javascript:pageMove(${paginationInfo.pageSize}, ${paginationInfo.currentPageNo}, 'next')"><c:out value="다음"/></a>
+			</div>
+			
+		</div>
+	</div>
+	</div>
+	<div id="modal_back">
+		<div id="wrap">
+	        <div id="header">
+	            <h1>사용자 정보수정</h1>
+	        </div>
+	        <form name = "updateUser" id="frm_update">
+		        <div class="ui form success error">
+		        	<c:forEach var="avo" items="${MemberVO }" >
+			            <div id="main_left">
+			                <div class="field">
+			                    <label>대표 이미지</label>
+			                    <img class="ui medium circular image" src="images/${avo.user_img }" style="width: 100px; height: 100px;">
+			                    <input type="file" style="display: none;" value="${avo.user_img }">
+			                    <button id="img_btn" class="ui button">이미지 불러오기</button>
+			                </div>
+			            </div>
+			
+			            <div id="main_right">
+			                <div class="field">
+			                    <label>아이디</label>
+			                    <input id="inputID" type="text" name="user_id" value="${avo.user_id }" readonly>
+			                </div>
+			
+			                <div class="field">
+			                    <label>이름</label>
+			                    <input type="text" id="user_name" name="user_name" value="${avo.user_name }" readonly>
+			                </div>
+			    
+			                <div class="field">
+			                    <label>비밀번호 *</label>
+			                    <input type="password" id="user_pw" name="user_pw">
+			                </div>
+			    
+			                <div class="field">
+			                    <label>이메일</label>
+								<input type="email" id="user_email" name="user_email" value="${avo.user_email }">  
+			                </div>
+			
+			                <div class="field">
+			                    <label>전화번호</label>
+			                    <input type="text" id="user_pnum" name="user_pnum" value="${avo.user_pnum }">
+			                </div>
+			                
+			                <div class="field">
+			                	<label style="display: none;">생년월일</label>  
+			                	<input type="hidden" id="user_birth" name="user_birth" value="${avo.user_birth }"/>
+			                </div>
+			               	<input type="hidden" id="user_rank" name="user_rank" value="${avo.user_rank }"/>
+			            </div>
+		            </c:forEach>
+		        </div>
+	        <div class="clear"></div>
+	
+	        <div id="footer">
+	            <button id="updateUser_btn" type="button"  class="ui button">수정</button>
+	            <button id="update_cancel_btn" onClick="closeModal();" class="ui button">취소</button>
+	        </div>
+	        </form>
+	    </div>
+    </div>
+</body>
+</html>

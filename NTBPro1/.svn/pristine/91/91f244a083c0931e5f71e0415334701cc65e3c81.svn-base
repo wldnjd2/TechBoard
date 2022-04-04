@@ -1,0 +1,107 @@
+/**
+ * 
+ */
+
+function addList(){
+		$(".bg_addList").css("display", "flex");
+		
+		var str = '';
+
+		for(var i = 0; i < categoryList.length; i++){
+			str += '<option value="'+categoryList[i]+'">'+categoryList[i]+'</option>'
+		}
+		str = '<option value="">선택</option>' + str;
+		
+		$("#category_addList").html(str)
+		
+	}
+
+function closeModal_addList(){
+		$(".bg_addList").css("display", "none")
+		
+	}
+
+	
+	function insertTechList(post_contents){
+		
+		if($("#category_addList option:selected").val() == ""){
+			alert("게시글 카테고리를 선택하세요.")
+			return;
+		}else if($("#title_addList").val() == ""){
+			alert("제목을 입력하세요.")
+			$("#title_addList").focus();
+			return;
+		}else if(post_contents == ""){
+			alert("내용을 입력하세요.")
+		}
+
+		$("#post_contents_addList").val(post_contents)
+		$("#user_id_addList").val(user_id)
+		
+		
+		
+//		var formData = $("#frm_addList").serialize();
+
+		var formData = {
+			'post_title' : $("#title_addList").val(),
+			'post_contents' : $("#post_contents_addList").val(),
+			'post_img' : $("#post_img_addList").val(),
+			'post_file' : $("#post_file_addList").val(),
+			'user_id' : $("#user_id_addList").val(),
+			'cat_cname' : $("#category_addList").val()
+		}
+
+
+		
+		
+		$.ajax({
+			type: "POST",
+			data: formData,
+			url : "./insertTechList.do",
+			dataType: "json",
+			success: function(data){
+				alert(data.msg)
+				pagination(1, '');
+				var str = '';
+
+				for(var i = 0; i < categoryList.length; i++){
+					str += '<option value="'+categoryList[i]+'">'+categoryList[i]+'</option>'
+				}
+				str = '<option value="">선택</option>' + str;
+				
+				$("#category_addList").html(str)
+				
+				$("#title_addList").val('');
+				myClassicEditor.setData('');
+				$("#image_addList").val('');
+				category_pagination(1, '');
+				closeModal_addList();
+			},
+			error : function(error){
+				console.log(error)
+			}
+		})		
+	}
+
+	function encodingFile(event){
+
+		var reader = new FileReader();
+		reader.readAsDataURL(event.target.files[0]);
+		reader.onload = function(event){
+			
+			$("#post_file_addList").val(event.target.result);
+		}
+	}
+	
+	function encodingImgFile(event){
+
+		var reader = new FileReader();
+		reader.readAsDataURL(event.target.files[0]);
+		reader.onload = function(event){
+			
+			$("#post_img_addList").val(event.target.result);
+			
+		}
+	}
+	
+	

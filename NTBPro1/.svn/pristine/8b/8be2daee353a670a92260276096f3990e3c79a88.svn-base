@@ -1,0 +1,194 @@
+@charset "UTF-8";
+	header{
+		width : 100%;
+		height : 40px;
+		background: #EFEFEF;
+		margin-bottom: 10px;
+	}
+	#menu{
+		width : 500px;
+		height : 30px;
+		float : right;
+	}
+	.btn_menu{
+		color: #767676;
+	}
+	.btn_menu:hover{
+		color : black;
+	}
+	#logo-div{
+		width : 100%;
+		height : 250px;
+	}
+	#logo-img{
+		width : 600px;
+		height : 200px;
+		margin : 0 auto;
+	}
+	#board-category{
+		width : 100%;
+		height : 70px;
+		
+	}
+	#category{
+		width : 700px;
+		height : 70px;
+		margin : 0 auto;
+		text-align: center;
+	}
+	.category-btn{
+		width : 80px;
+		height: 50px;
+		margin-right: 70px;
+	}
+	#board-div{
+		width : 100%;
+		height : 530px;
+		
+	}
+	#board{
+		width : 50%;
+		height: 555px;
+		margin : 0 auto;
+	}
+	#pagination{
+		width : 60%;
+		height : 40px;
+		margin : 0 auto;
+		margin-top : 15px;
+		text-align: center;
+	}
+	.paging{
+		font-size: 25px;
+		text-decoration: none;
+		margin-left: 3px;
+		margin-right: 3px;
+	}
+	.pageMove{
+		margin-left: 5px;
+		margin-right: 5px;
+		color : grey;
+	}
+	.pageMove:hover{
+		color : black;
+	}
+	.paging:link{
+		color: black;
+	}
+	.paging:hover{
+		color: red;
+		cursor: pointer;
+	}
+	.td-title:hover{
+		background: silver;
+		cursor: pointer;
+	}
+	#all_div{
+		z-index: 10;
+	}
+	/* 공통 부분 시작 */
+	#modal_back{
+		display: none; /* Hidden by default */
+		position: fixed; /* Stay in place */
+		z-index: 10; /* Sit on top */
+		left: 0;
+		top: 0;
+		width: 100%; /* Full width */
+		height: 100%; /* Full height */
+		overflow: auto; /* Enable scroll if needed */
+		background-color: rgb(0,0,0); /* Fallback color */
+		background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+	}
+	#wrap{
+		position: fixed;
+		background-color: #fefefe;
+		top: calc(50% - 300px);
+		margin-left: calc(50% - 400px); /* 15% from the top and centered */
+		border: 1px solid #888;
+		width: 800px; /* Could be more or less, depending on screen size */
+		height: 600px;
+		z-index: 100;
+	}
+	
+	.clear{
+	    clear: both;
+	}
+	/* 공통 부분 종료 */
+	
+	/* header 부분 시작 */
+	#header{
+		padding-left: 55px;
+	    padding-bottom: 50px;
+	    text-align: center;
+	}
+	.closeBtn{
+		background: silver;
+		margin-right: 20px;
+		padding: 5px 10px 5px 10px;
+		border-radius: 4px;
+		cursor: pointer;
+		float : right;
+	}
+	/* header 부분 종료 */
+	
+	/* main_left 부분 시작 */
+	#main_left{
+	    margin: 0 50px 0 70px;
+	    width: 150px;
+	    float: left;
+	}
+	#img_btn{
+	    margin-top: 10px;
+	}
+	.thumb{
+		border-radius: 50%;
+	}
+	#image_field #image_field_upload { 
+		display: inline-block; 
+		padding: .5em .75em; 
+		color: #999; 
+		font-size: inherit; 
+		line-height: normal; 
+		vertical-align: middle; 
+		background-color: #fdfdfd; 
+		cursor: pointer; 
+		border: 1px solid #ebebeb;
+		border-bottom-color: #e2e2e2; 
+		border-radius: .25em; 
+	} 
+	#image_field input[type="file"] { /* 파일 필드 숨기기 */ 
+		position: absolute; 
+		width: 1px; 
+		height: 1px; 
+		padding: 0; 
+		margin: -1px; 
+		overflow: hidden; 
+		clip:rect(0,0,0,0); 
+		border: 0; 
+	}
+
+	/* main_left 부분 종료 */
+	
+	/* main_right 부분 시작 */
+	#main_right{
+	    width: 350px;
+	    float: left;
+	}
+	.message{
+	    display: none;
+	}
+	.none{
+	    display: none;
+	}
+	.fr{
+	    float: right;
+	}
+	/* main_right 부분 종료 */
+	
+	/* footer 부분 시작*/
+	#footer{
+	    margin: 30px 0 30px 0;
+	    text-align: center;
+	}
+	/* footer 부분 종료*/
+	

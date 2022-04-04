@@ -1,0 +1,48 @@
+package kr.co.negga.ntb.account.service.impl;
+
+import java.util.List;
+
+import egovframework.rte.psl.dataaccess.EgovAbstractMapper;
+import egovframework.rte.psl.dataaccess.mapper.Mapper;
+import kr.co.negga.ntb.account.service.AccountVO;
+
+/**
+ * @Class AccountMapper.java
+ * @Description	회원관리 관련 Mapper Class(mybatis)
+ * @Since 2022.03.17
+ * @author jshan
+ * @version 1.0
+ * @Modification 수정사항 없음 
+ */
+
+@Mapper("accountMapper")
+public class AccountMapper extends EgovAbstractMapper{
+
+	/**
+	 * 회원 가입시 insert를 함
+	 * @param vo 회원 정보가 담긴 AccountVO
+	 * @exception Exception
+	 */
+	public int insertMember(AccountVO avo) {
+		
+		return insert("insertMember",avo);
+	}
+
+	public int selectIdCheck(String user_id) {
+		
+		return selectOne("selectIdCheck",user_id);
+	}
+
+	/**
+	 * 회원 리스트를 불러온다.
+	 * @param vo 회원 정보가 담긴 AccountVO
+	 * @return 회원 정보 AccountVO
+	 * @exception Exception
+	 */
+	public List<AccountVO> selectMember(String user_id) {
+		
+		return selectList("selectMember", user_id);
+	}
+
+	
+}

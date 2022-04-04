@@ -1,0 +1,18 @@
+*{
+    margin: 0px;
+    padding: 0px;
+}
+body{
+    width: 1024px;
+    margin: auto;
+}
+#wrap{
+    padding: 50px 100px 0px 100px;
+}
+#header{
+    text-align: center;
+}
+#footer{
+    margin: 20px 0 20px 0;
+    text-align: center;
+}

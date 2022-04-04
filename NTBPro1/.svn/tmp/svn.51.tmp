@@ -1,0 +1,747 @@
+<%@page import="org.stringtemplate.v4.compiler.STParser.mapExpr_return"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>내가시스템 :: 기술게시판</title>
+<%@ include file="/WEB-INF/jsp/admin/manageUser.jsp" %>
+<%@ include file="/WEB-INF/jsp/board/insertTech.jsp" %>
+<link rel="stylesheet" href="<c:url value='css/main/main.css' />">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.2/semantic.min.css" rel="stylesheet" type="text/css">
+<script
+      src="https://code.jquery.com/jquery-3.1.1.min.js"
+      integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+      crossorigin="anonymous"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="<c:url value='js/main/tech_paging.js'/>"></script>
+<script src="<c:url value='js/admin/manageBoardList.js'/>"></script>
+<script type="text/javascript">
+	function toBase64(event) {
+		var reader = new FileReader();
+		reader.readAsDataURL(event.target.files[0]);
+		reader.onload = function(event) {
+			var base64 = event.target.result;// img -> base64 변환
+			
+			var uploadFile = document.getElementById("user_img");
+	        uploadFile.value = base64;
+	       
+		};
+	}
+	
+	function init(){
+		category_pagination(1, '');
+	}
+
+</script>
+
+<!-- modal css -->
+<style>
+.detailModal_board {
+	box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px
+		rgba(0, 0, 0, 0.23);
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	
+}
+/* 	모달 배경화면 설정 */
+.detailModal_overlay {
+	background-color: rgba(0, 0, 0, 0.6);
+	width: 100%;
+	height: 100%;
+	position: absolute;
+}
+
+/* 	모달 박스창 설정 */
+.detailModal_content {
+	background-color: white;
+	padding: 50px 100px;
+	position: relative;
+	border-radius: 10px;
+	width: 50%;
+	top: 0px;
+	box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px
+		rgba(0, 0, 0, 0.23);
+	max-height:900px;
+    overflow-y:auto;	
+}
+
+/* 	모달 숨기기 */
+.detailModal_hidden {
+	display: none;
+}
+
+.detailModal_table {
+	width: 100%;
+	border: 1px solid #bcbcbc;
+	border-collapse: collapse;
+}
+
+.center {
+	text-align: center;
+}
+
+</style>
+
+<script type="text/javascript">
+
+	/*모달창 닫기*/
+	function closeModal() {
+		$(".detailModal_hidden").css("display", "none");
+	}
+	
+	/* 게시글 클릭 시 상세정보로 이동 */
+	function moveToDetail(post_pnum){
+		$.ajax({
+			url: "${pageContext.request.contextPath}/selectBoardDetail.do",
+			type: "POST",
+			dataType: "json",
+			data: {'post_pnum' : post_pnum
+			},
+			success: function(data){ 
+				
+				//Display Modal
+				$(".detailModal_hidden").css("display", "flex");
+				
+				//댓글 불러오기
+				replyList(post_pnum);
+				
+				//좋아요 개수 불러오기
+				var replyLikeCount = data.replyLikeCount;
+				var LikeCount = document.getElementById('likeCount_div');
+				$("#likeCount_div").html("좋아요 : "+replyLikeCount);
+				
+				//좋아요 불러오기
+				var Like = document.getElementById('post_like');
+				Like.innerText ='';
+				if(data.replyLikeShow == null) {
+					Like.innerText +='♡';
+					Like.setAttribute('onclick', "LikeAdd(" + post_pnum +")" );
+							
+				}else {
+					Like.innerText += '♥';
+					Like.setAttribute('onclick', "LikeCancel(" + post_pnum +")" );
+				}
+
+				//게시글 작성자와 로그인유저가 같을때 -> 게시글 수정삭제 가능
+				var manageDiv = document.getElementById("manageDiv");
+				var guestDiv = document.getElementById("guestDiv");
+				
+				if(data.compare_boardwriter == 1) {
+					manageDiv.style.display= "block";
+					guestDiv.style.display= "none";
+				}else {  //다를때
+					guestDiv.style.display= "block";
+					manageDiv.style.display= "none";
+				}
+				
+				//싫어요 개수 불러오기
+				var replyHateCount = data.replyHateCount;
+				$("#HateCount_div").html("싫어요 : "+replyHateCount);
+				
+				//싫어요 불러오기
+				var Hate = document.getElementById('post_hate');
+				Hate.innerText = '';
+				if(data.replyHateShow == null) {
+					Hate.innerText +='싫어요';
+					Hate.setAttribute('onclick', "HateAdd(" + post_pnum +")" );
+							
+				}else {
+					Hate.innerText += '싫어요 취소';
+					Hate.setAttribute('onclick', "HateCancel(" + post_pnum +")" );
+				}
+
+				//작성자 이미지 갖고 오기
+				var writerImg = data.writerImage;
+				var writerImageDiv = document.getElementById("writer_img");
+				writerImageDiv.src = writerImg;
+				
+				//데이터 모달창으로 이동
+				$("#post_pnum").html(data.resultVO.post_pnum);
+				$("#post_regdate").html(data.resultVO.post_regdate);
+				$("#post_title").html(data.resultVO.post_title);
+				$("#detail_post_contents").html(data.resultVO.post_contents);
+				//이미지 
+				$("#post_img").attr("src", data.resultVO.post_img);
+				
+				//첨부파일
+// 				$("#detil_post_file").html(data.resultVO.post_file);
+// 				$("#detail_post_fname").html(data.resultVO.post_fname);
+// 				$("#detail_post_file").attr("href", data.resultVO.post_file )
+				
+				$("#post_hits").html(data.resultVO.post_hits);
+				$("#user_id").html(data.resultVO.user_id);
+				$("#cat_cname").html(data.resultVO.cat_cname);
+				
+			}, 
+			error: function (e){
+				console.log(e);
+			} 
+		});
+	}
+	
+	/*db에 댓글 데이터 저장*/
+	function replyInsert(post_pnum){
+		
+		//댓글 글자열 변수에 옮김
+		var rep_contents =$('#rep_contents').val();
+		
+		//댓글을 입력하지 않으면 
+		if(rep_contents == 0){
+			alert("댓글을 입력하세요.")
+		}else{
+	
+			var insertData = {
+						"rep_contents" : rep_contents,
+						"post_pnum" : post_pnum, 
+						 };
+			
+			$.ajax({
+				url: "${pageContext.request.contextPath}/insertBoardReply.do",
+				type: "POST",
+				dataType: "json",
+				data: insertData,
+				success: function(data){
+					
+					//댓글 디비에 넣으면 댓글 불러오기
+					replyList(post_pnum);
+				},
+				error: function(e){
+					console.log(e);
+				}
+			});
+		}
+	}
+
+	/*댓글 불러오기*/
+	function replyList(post_pnum){
+		console.log("replyList");
+		$.ajax({
+			url: "${pageContext.request.contextPath}/selectBoardReplyList.do",
+			type: "POST",
+			dataType: "json",
+			data: {'post_pnum' : post_pnum},
+			
+			success: function(data){
+				
+				var resultList = data.resultVO;
+				var resultList_CNT = data.resultVO_CNT;
+				var replyModal = document.getElementById("replyModal");
+				
+				//댓글 총 갯수 불러오기
+				$("#rep_rnum_CNT").html(resultList_CNT);
+				
+				//댓글 불러오기 초기화
+				replyModal.innerHTML = '';
+				
+				for(var i = 0 ; i<resultList.length; i++){
+					
+					//태그 요소 생성
+					var rep_rnum_result = resultList[i].rep_rnum;
+					var replyModal_div1 = document.createElement("div");
+					var replyModal_div2 = document.createElement("div");
+					var clean_div = document.createElement("div");
+					replyModal_div1.setAttribute('class', "reply_div")
+					replyModal_div2.setAttribute('id',"contentsReset"+rep_rnum_result);
+					clean_div.setAttribute('class', "clear");
+					
+					var replyModal_modButton = document.createElement("button");
+					replyModal_modButton.setAttribute('onclick',"replyUpdateWindow("+rep_rnum_result + ", " + post_pnum+")");
+					replyModal_modButton.setAttribute('class', "ui primary button fr");
+					
+					var replyModal_delButton = document.createElement("button");
+					replyModal_delButton.setAttribute('onclick',"replyDelete("+rep_rnum_result + ", " + post_pnum+")");
+					replyModal_delButton.setAttribute('class', "ui primary button fr");
+					
+					var replyModal_br = document.createElement("br");
+					
+					
+					replyModal_div1.innerText = 
+							'작성자 : '+resultList[i].user_id+" | "+
+							'작성일 : '+ resultList[i].rep_regdate;
+					
+					replyModal_div2.innerText = 
+							'내용 : '+resultList[i].rep_contents;
+					
+					replyModal_modButton.innerText = "수정";
+					replyModal_delButton.innerText = "삭제";
+					
+					replyModal.append(replyModal_div1);
+					replyModal.append(clean_div);
+					replyModal_div1.append(replyModal_div2);
+					replyModal_div2.append(replyModal_br);
+					replyModal_div2.append(replyModal_br);
+					
+					replyModal_div2.append(replyModal_modButton);	
+					replyModal_div2.append(replyModal_delButton);	
+					
+				}
+			},
+			error: function(e){
+				console.log(e);
+			}
+		});
+	}
+		
+	//댓글 수정 버튼누르고 textarea 띄우기
+	function replyUpdateWindow(rep_rnum_result, post_pnum){
+		
+		var contentsReset = document.getElementById("contentsReset"+rep_rnum_result);
+		contentsReset.innerHTML = '';
+		
+		var replyModal_text = document.createElement("textarea");
+		replyModal_text.setAttribute('id', "replyModal_text_val");
+		
+		var replyModal_saveButton = document.createElement("button");
+		replyModal_saveButton.setAttribute('class', "ui primary button fr");
+		replyModal_saveButton.setAttribute('id', "modify_save_btn");
+		replyModal_saveButton.setAttribute('onclick', "replyUpdateSave("+rep_rnum_result + ", " + post_pnum +" )")
+		replyModal_saveButton.innerText = "수정완료";
+		
+		var replyModal_br = document.createElement("br");
+		
+		contentsReset.append(replyModal_text);
+		contentsReset.append(replyModal_saveButton);
+	}
+		
+	/* 댓글 수정완료 저장 */
+	function replyUpdateSave(rep_rnum_result, post_pnum){
+		var replyModal_text_val = document.getElementById("replyModal_text_val").value;
+		
+		var updateDataSave = {
+					"rep_rnum" : rep_rnum_result, 
+					"post_pnum" : post_pnum, 
+					"rep_contents" : replyModal_text_val
+					 };
+		$.ajax({
+			url: "${pageContext.request.contextPath}/updateBoardReplyList.do",
+			type: "POST",
+			dataType: "json",
+			data: updateDataSave,
+			success: function(data){
+				
+				//업데이트 된 데이터를 불러오기
+				replyList(post_pnum)
+			},
+			error: function(e){
+				console.log(e)
+
+			}
+		});
+	}
+
+	/*댓글 삭제*/
+	function replyDelete(rep_rnum_result, post_pnum){
+		var deleteData = {
+			"rep_rnum" : rep_rnum_result, 
+			"post_pnum" : post_pnum
+		}
+		
+		$.ajax({
+			url: "${pageContext.request.contextPath}/deleteBoardReplyList.do",
+			type: "POST",
+			dataType: "json",
+			data: deleteData,
+			success: function(data){
+				replyList(post_pnum)
+				
+			},
+			error: function(e){
+				console.log(e)
+
+			}
+		});
+	}
+
+	/*좋아요 누름*/
+	function LikeAdd(post_pnum){
+		data = {"post_pnum" : post_pnum} 
+		$.ajax({
+			url: "${pageContext.request.contextPath}/replyLikeAdd.do",
+			type: "POST",
+			dataType: "json",
+			data: data,
+			success: function(data){
+				moveToDetail(post_pnum);
+				
+			},
+			error: function(e){
+				console.log(e)
+
+			}
+		});
+	}
+	
+	/*좋아요 취소*/
+	function LikeCancel(post_pnum){
+		data = {"post_pnum" : post_pnum} 
+		$.ajax({
+			url: "${pageContext.request.contextPath}/replyLikeCancel.do",
+			type: "POST",
+			dataType: "json",
+			data: data,
+			success: function(data){
+				moveToDetail(post_pnum);
+			},
+			error: function(e){
+				console.log(e)
+			}
+		});
+	}
+	
+
+	
+	/*게시글 수정*/
+	// 싫어요 저장
+	function HateAdd(post_pnum){
+		
+		data = {"post_pnum" : post_pnum} 
+		$.ajax({
+			url: "${pageContext.request.contextPath}/replyHateAdd.do",
+			type: "POST",
+			dataType: "json",
+			data: data,
+			success: function(data){
+				moveToDetail(post_pnum);
+				
+			},
+			error: function(e){
+				console.log(e)
+
+			}
+		});
+	}
+	
+	// 싫어요 취소
+	function HateCancel(post_pnum){
+		
+		data = {"post_pnum" : post_pnum} 
+		$.ajax({
+			url: "${pageContext.request.contextPath}/replyHateCancel.do",
+			type: "POST",
+			dataType: "json",
+			data: data,
+			success: function(data){
+				moveToDetail(post_pnum);
+			},
+			error: function(e){
+				console.log(e)
+
+			}
+		});
+	}
+	
+	/*게시판 상세내용 수정*/
+	function modifyModalDetail(post_pnum){
+		console.log("modifyDetail")
+		
+		
+		
+			
+		//수정완료버튼
+		var modifyDetailFinish = document.createElement("button");
+		modifyDetailFinish.innerText = '수정완료';
+		//취소 버튼
+		var modifyDetailCancel = document.createElement("button");
+		modifyDetailCancel.innerText = '취소';
+		
+		
+		
+		
+		//작성일 textarea 객체 생성  
+		var regdate_text = document.createElement("textarea");
+		
+		
+		//제목
+		var postTitle = document.getElementById("post_title");
+		var postTitle_text = document.createElement("input");
+		postTitle_text.setAttribute('type',"text");
+		postTitle.append(postTitle_text);
+		//내용
+		var postTitle = document.getElementById("post_title");
+		var postTitle_text = document.createElement("input");
+		postTitle_text.setAttribute('type',"text");
+		postTitle.append(postTitle_text);
+		//이미지
+		var postTitle = document.getElementById("post_title");
+		var postTitle_text = document.createElement("input");
+		postTitle_text.setAttribute('type',"text");
+		postTitle.append(postTitle_text);
+		
+		
+				
+		data = {"post_pnum" : post_pnum} 
+		$.ajax({
+			url: "${pageContext.request.contextPath}/updateBoardDetail.do",
+			type: "POST",
+			dataType: "json",
+			data: data,
+			success: function(data){
+				
+			},
+			error: function(e){
+				console.log(e)
+			}
+		});
+	}
+	
+	/*게시글 삭제*/
+	function deleteModalDetail(post_pnum){
+		
+		data = {"post_pnum" : post_pnum} 
+		$.ajax({
+			url: "${pageContext.request.contextPath}/deleteBoardDetail.do",
+			type: "POST",
+			dataType: "json",
+			data: data,
+			success: function(data){
+				//모달창 닫기
+				closeModal()
+				//메인페이지를 로드한다
+				category_pagination(1, '')
+			},
+			error: function(e){
+				console.log(e)
+			}
+		});
+	}
+	
+	
+</script>
+
+</head>
+<body onload="init();">
+	<div id="all_div">
+		<header>
+			<div id="menu"></div>
+		</header>
+
+		<div id="logo-div">
+			<div id="logo-img">
+				<img src='<c:url value="/images/logo.png"/>' alt="로고" />
+			</div>
+		</div>
+
+		<div id="board-category">
+			<div id="category"></div>
+		</div>
+
+		<div id="board-div">
+			<div id="board">
+				<table class="ui celled table">
+					<colgroup id="listColGroup">
+						<col width="50px">
+						<col width="60px">
+						<col width="230px">
+						<col width="50px">
+						<col width="70px">
+						<col width="40px">
+					</colgroup>
+					<thead>
+						<tr id="listTr">
+							<th>번호</th>
+							<th>카테고리</th>
+							<th>제목</th>
+							<th>작성자</th>
+							<th>날짜</th>
+							<th>조회수</th>
+						</tr>
+					</thead>
+					
+					<tr id="tr-async1" class="tr-async" ></tr>
+					<tr id="tr-async2" class="tr-async" ></tr>
+					<tr id="tr-async3" class="tr-async" ></tr>
+					<tr id="tr-async4" class="tr-async" ></tr>
+					<tr id="tr-async5" class="tr-async" ></tr>
+					<tr id="tr-async6" class="tr-async" ></tr>
+				</table>
+				<div id="manageBoardListBtn"></div>
+				<div id="pagination"></div>
+
+			</div>
+		</div>
+
+
+
+		<!-- 게시글 상세보기 모달창 시작	 -->
+		<div class="detailModal_board detailModal_hidden">
+			<div class="detailModal_overlay"></div>
+			<div class="detailModal_content">
+				<button class="closeBtn2" onclick="closeModal()">x</button>
+				<h2 class="center">게시판 상세내용</h2> 
+				<br>
+
+				<table>
+<%-- 					<colgroup> --%>
+<%-- 						<col style="width: 20%;"> --%>
+<%-- 						<col style="width: 40%"> --%>
+<%-- 						<col style="width: 40%"> --%>
+<%-- 					</colgroup> --%>
+					<tr style="display: none;">
+						<th bgcolor="#C0D6E4" style="height: 33px;">번호</th>
+						<td colspan="2" id="post_pnum" ></td>
+					</tr>
+					<tr class="detailModal_table" >
+						<th bgcolor="#C0D6E4" style="height: 33px; width: 100px;">작성일</th>
+						<td style="text-align: left; width: 700px ;" colspan="2" id="post_regdate"></td>
+					</tr>
+					<tr class="detailModal_table" >
+						<th bgcolor="#C0D6E4" style="height: 33px;">작성자</th>
+						<td style="width: 100px;">
+							<img id="writer_img" src="" style="width: 70px; height: 70px; border-radius: 50%; margin-top: 5px;">
+						</td>
+						<td style="text-align: left;" id="user_id"></td>
+					</tr>
+					<tr class="detailModal_table" >
+						<th bgcolor="#C0D6E4" style="height: 33px;">제목</th>
+						<td style="text-align: left;" colspan="2" id="post_title"></td>
+					</tr>
+					
+					<tr class="detailModal_table" >
+						<th bgcolor="#C0D6E4" style="height: 200px;">내용</th>
+						
+						<td style="height: 200px;">
+							<img class="thumb" src="" id="post_img" style="width: 100%" >
+						</td>
+						
+						<td style="text-align: left;" id="detail_post_contents"></td>
+					</tr>
+					
+<!-- 					첨부파일 -->
+<!-- 					<tr class="detailModal_table" > -->
+<!-- 						<th bgcolor="#C0D6E4" style="height: 33px;">첨부파일</th> -->
+<!-- 						<td style="text-align: left;" colspan="2" id="detail_post_fname"> -->
+<!-- 						<td> -->
+<!-- 							<a href="" id="detail_post_file"></a> -->
+<!-- 						</td> -->
+<!-- 					</tr> -->
+					
+				</table>
+				<br>
+				
+				<div class="button_div">
+<!-- 				좋아용 -->
+					<div class ="center fl" id="like_btn">
+						<button onclick="LikeModal($('#post_pnum')[0].innerText);" id="post_like" class="ui button"></button>
+					</div>
+					<div id="likeCount_div" class ="center fl select_text"></div>
+					<div class ="center fl " id="hate_btn">
+						<button onclick="HateModal($('#post_pnum')[0].innerText);" id="post_hate" class="ui button"></button>
+					</div>
+					<div id="HateCount_div" class ="center fl select_text"></div>
+				</div>
+				
+				<div class="clear"></div><br>
+				
+<!-- 				수정 삭제 목록 -->
+<!-- 				관리자모드 -->
+				<div id="manageDiv" class="center" style = "display:none">
+					<button class="ui primary button" onclick="modifyModalDetail($('#post_pnum')[0].innerText);">수정</button>
+					<button class="ui primary button" onclick="deleteModalDetail($('#post_pnum')[0].innerText);">삭제</button>
+					<button class="ui primary button" onclick="closeModal();" >목록</button>
+				</div>
+<!-- 				게스트모드 -->
+				<div id="guestDiv" class="center" style = "display:none">
+					<button class="ui primary button" onclick="closeModal();">목록</button>
+				</div>
+				<div>
+					<hr>
+					
+<!-- 					댓글  작성하기-->
+					comment <br>
+
+					<textarea id="rep_contents" placeholder="댓글을 작성하세요." rows="2" cols="80"></textarea><br>
+					<div class="ui blue labeled submit icon button fr" onclick="replyInsert($('#post_pnum')[0].innerText);">
+      					<i class="icon edit"></i> 댓글 작성
+    				</div>
+					<br>
+					<br>
+				</div>
+				
+<!-- 				댓글달기 -->
+				댓글 총 갯수 (<span id="rep_rnum_CNT"></span>)<br><br>
+				<div id="replyModal">
+				</div>
+				
+			</div>
+		</div>
+		<!-- 게시글 상세보기 모달창 끝	 -->
+
+	</div>
+	<div id="modal_back">
+		<div id="wrap">
+			<div id="header">
+				<button class="closeBtn" onclick="closeModal2()">x</button>
+				<h1>사용자 정보수정</h1>
+			</div>
+			<form name="updateUser" id="frm_update">
+				<div class="ui form success error">
+					<div id="main_left">
+						<div class="field" id="image_field">
+							<label>대표 이미지</label> <label for="uploadFile"
+								id="image_field_upload">업로드</label> <input type="file"
+								id="uploadFile" accept="image/jpeg, image/jpg, image/png"
+								name="uploadFile" onchange="toBase64(event);">
+							<%-- <c:if test="">
+	                    		<img class="thumb" src="<c:url value='/'/>images/라이언 사진.png" style="width: 100px; height: 100px;">
+	                    	</c:if> --%>
+							<img class="thumb" src="" id="img"
+								style="width: 150px; height: 150px;"> <a
+								href="javascript:void(0);" class="dellink">파일 삭제</a> <input
+								type="hidden" id="user_img" name="user_img">
+						</div>
+					</div>
+
+					<div id="main_right">
+						<div class="field">
+							<label>아이디</label> <input id="inputID" type="text" name="user_id"
+								value="${Session_user_id}" readonly>
+						</div>
+
+						<div class="field">
+							<label>이름</label> <input type="text" id="user_name"
+								name="user_name" readonly>
+						</div>
+
+						<div class="field">
+							<label>비밀번호 *</label> <input type="password" id="user_pw"
+								name="user_pw">
+						</div>
+
+						<div class="field">
+							<label>이메일</label> <input type="email" id="user_email"
+								name="user_email">
+						</div>
+
+						<div class="field">
+							<label>전화번호</label> <input type="text" id="user_pnum"
+								name="user_pnum">
+						</div>
+						<p>* 비밀번호를 정확히 입력하여야 수정 가능.</p>
+						<div class="field">
+							<label style="display: none;">생년월일</label> <input type="hidden"
+								id="user_birth" name="user_birth" />
+						</div>
+						<input type="hidden" id="user_rank" name="user_rank" />
+					</div>
+				</div>
+				<div class="clear"></div>
+			</form>
+			<div id="footer">
+				<button id="updateUser_btn" type="button" class="ui button">수정</button>
+				<button id="update_cancel_btn" onclick="closeModal2()"
+					class="ui button">취소</button>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

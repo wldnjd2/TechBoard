@@ -1,0 +1,51 @@
+@charset "UTF-8";
+
+/* modal css */
+.detailModal_board {
+	box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 
+				0 6px 6px rgba(0, 0, 0, 0.23);
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	
+}
+
+/* 	모달 배경화면 설정 */
+.detailModal_overlay {
+	background-color: rgba(0, 0, 0, 0.6);
+	width: 100%;
+	height: 100%;
+	position: absolute;
+}
+
+/* 	모달 박스창 설정 */
+.detailModal_content {
+	background-color: white;
+	padding: 50px 100px;
+	position: relative;
+	border-radius: 10px;
+	width: 50%;
+	top: 0px;
+	max-height:900px;
+    overflow-y:auto;	
+}
+
+/* 	모달 숨기기 */
+.detailModal_hidden {
+	display: none;
+}
+
+.detailModal_table {
+	width: 100%;
+	border: 1px solid #bcbcbc;
+	border-collapse: collapse;
+}
+
+.center {
+	text-align: center;
+}

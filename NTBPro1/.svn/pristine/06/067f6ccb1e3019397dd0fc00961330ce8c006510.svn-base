@@ -1,0 +1,67 @@
+/**
+ * login.js파일
+ */
+ 
+ $(function(){
+
+	// 로그인 페이지 내에서 enter키 이벤트 
+	$("body").keypress(function(e){
+		if(e.keyCode === 13){
+			$("#btn_submit").click();
+		}
+	});
+
+	//로그인 (login)
+	$("#btn_submit").click(function(){
+		
+		var user_id = $("#user_id");
+		var user_pw = $("#user_pw");
+		var user_id_real = $("#USER_ID");
+		var user_pw_real = $("#USER_PW");
+		
+		/*아이디 비밀번호 작성 완료했는지 확인 하는 부분*/
+		if(user_id.val() == ""){
+			alert("아이디를 입력해주세요.");
+			$("#user_id").focus();
+			return false;
+		}
+		if(user_pw.val() == ""){
+			alert("암호를 입력해주세요.");
+			$("#user_pw").focus();
+			return false;
+		}
+		
+		// rsa 암호화
+        var rsa = new RSAKey();
+        rsa.setPublic($('#RSAModulus').val(),$('#RSAExponent').val());
+        
+        user_id_real.val(rsa.encrypt($.trim(user_id.val())));
+        user_pw_real.val(rsa.encrypt($.trim(user_pw.val())));
+        
+        user_id.val("");
+        user_pw.val("");
+        
+		/*모든 정보를 입력했으면 로그인 되는 부분*/
+		$.ajax({
+			type: "POST",
+			data: "user_id_real="+user_id_real.val()+"&user_pw_real="+user_pw_real.val(),	// json(전송) 타입
+			url: "/NTBPro1/login/loginWriteSub.do",
+			dataType: "json",	//리턴 타입
+			
+			success: function(data){
+				if(data.result == "ok"){
+					location="/NTBPro1"	//로그인 후 화면 설정
+				} else{
+					alert("로그인 정보를 다시 확인해주세요.");
+				}
+			},
+			error: function(e){	//장애 발생
+				if(e.status == 500){
+					alert("아이디와 비밀번호가 맞는지 확인해주세요.");
+				}else{
+					alert("오류발생");
+				}
+			}
+		});
+	});
+});

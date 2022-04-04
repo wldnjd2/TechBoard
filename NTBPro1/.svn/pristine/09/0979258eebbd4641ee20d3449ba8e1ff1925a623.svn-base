@@ -1,0 +1,246 @@
+<%@ page contentType="text/html; charset=utf-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="ui" uri="http://egovframework.gov/ctl/ui"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%>
+<%
+    String ctxPath = (String) request.getContextPath();
+%>
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.2/semantic.min.css" rel="stylesheet" type="text/css">
+	<link href="<c:url value='/'/>css/insertUser.css?ver=100" rel="stylesheet" type="text/css" >
+	<title>회원가입</title>
+	
+	<script
+	  src="https://code.jquery.com/jquery-3.1.1.min.js"
+	  integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+	  crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.2/semantic.min.js"></script>
+
+	<script>
+	$(function(){
+		
+		//회원가입 (insert)
+    	$("#btn_insertUser").click(function(){
+    		
+    		var user_id = $.trim($("#inputID").val());
+    		var user_name = $.trim($("#user_name").val());
+    		var user_pw1 = $.trim($("#user_pw").val());
+    		var user_pw2 = $.trim($("#user_pw_collect").val());
+    		var user_email = $.trim($("#user_email").val());
+    		var regularExpression = /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i;
+    		var user_pnum = $.trim($("#user_pnum").val());
+    		var regExp = /^\d{3}-\d{3,4}-\d{4}$/;
+    		var user_year = $.trim($("#user_year").val());
+    		var user_month = $.trim($("#user_month").val());
+    		var user_day = $.trim($("#user_day").val());
+    		
+    		alert("1111");
+    		
+    		if(user_id == ""){
+    			alert("아이디를 입력해주세요.");
+    			$("#userID").focus();
+    			return false;
+    		} else if(user_name == ""){
+    			alert("이름을 입력해주세요.");
+    			$("#user_name").focus();
+    			return false;
+    		}else if(user_pw1 == ""){
+    			alert("비밀번호를 입력해주세요.");
+    			$("#user_pw1").focus();
+    			return false;
+    		} else if(user_pw1 != user_pw2) {
+    			alert("비밀번호가 일치하지 않습니다.");
+    			return false;
+    		} else if(user_pw2 == ""){
+    			alert("비밀번호 확인을 입력해주세요.");
+    			$("#user_pw2").focus();
+    			return false;
+    		} else if(user_email != ""){
+    			if(regularExpression.test(user_email) == false){
+        			alert("이메일 형식을 한번 확인해주세요.");
+        			$("#user_email").focus();
+        			return false;
+    			}else{
+    				if(user_year == ""){
+    	    			alert("생년월일을 입력해주세요.");
+    	    			$("#user_year").focus();
+    	    			return false;
+    	    		} else if(user_month == ""){
+    	    			alert("생년월일을 입력해주세요.");
+    	    			$("#user_month").focus();
+    	    			return false;
+    	    		} else if(user_day == ""){
+    	    			alert("생년월일을 입력해주세요.");
+    	    			$("#user_day").focus();
+    	    			return false;
+    	    		}
+    			}
+    		} 
+    		
+    		var formData = $("#frm").serialize();
+    		
+    		alert("2222");
+    		
+    		alert(formData);
+    		
+    		$.ajax({
+				type: "POST",
+				data: formData,	// json(전송) 타입
+				url: "${pageContext.request.contextPath}/account/insertUserWrite.do",
+				dataType: "text",	//리턴 타입
+				
+				success: function(result){
+					if(result == "ok"){
+						alert("회원가입이 완료되었습니다.");
+						location="${pageContext.request.contextPath}/login/logIn.do"	//로그인 후 화면 설정
+					} else{
+						alert("회원가입이 실패하였습니다.");
+					}
+				},
+				error: function(){	//장애 발생
+					alert("오류발생");
+				}
+			});
+    	});
+    	
+    	// id 중복 체크
+    	$("#btn_idcheck").click(function(){
+    		
+    		var user_id = $.trim($("#inputID").val());	//현재 창에 입력된 값
+    		
+    		if(user_id == ""){
+    			alert("아이디를 입력해주세요.")
+    			$("#inputID").focus();
+    			return false;
+    		}
+    		
+    		//idcheck.do - 비동기 전송 방식
+    		$.ajax({
+    			type: "POST",
+				data: "user_id="+user_id,	// json(전송) 타입
+				url: "${pageContext.request.contextPath}/account/idcheck.do",
+				dataType: "text",	//리턴 타입
+				
+				success: function(result){	//성공이 되면 들어옴
+					if(result == "ok"){
+						$("#id_check").text("사용이 가능한 아이디 입니다.");
+						$("#id_check").css('color', 'blue');
+					} else{
+						$("#id_check").text("이미 사용중인 아이디 입니다.");
+						$("#id_check").css('color', 'red');
+					}
+				},
+				error: function(){	//장애 발생
+					alert("오류발생");
+				}
+    		});
+    		return false;
+    	});
+    });
+	
+	//비밀번호 확인
+	function check_pw(){
+        var pw = document.getElementById('user_pw').value;
+        var SC = ["!","@","#","$","%"];
+        var check_SC = 0;
+
+        if(pw.length < 6 || pw.length > 16){
+            window.alert('비밀번호는 6글자 이상, 16글자 이하만 이용 가능합니다.');
+            document.getElementById('user_pw').value='';
+        }
+        for(var i=0;i<SC.length;i++){
+            if(pw.indexOf(SC[i]) != -1){
+                check_SC = 1;
+            }
+        }
+        if(check_SC == 0){
+            window.alert('!,@,#,$,% 의 특수문자가 들어가 있지 않습니다.')
+            document.getElementById('user_pw').value='';
+        }
+        if(document.getElementById('user_pw').value !='' && document.getElementById('user_pw_collect').value!=''){
+            if(document.getElementById('user_pw').value==document.getElementById('user_pw_collect').value){
+                document.getElementById('check').innerHTML='비밀번호가 일치합니다.'
+                document.getElementById('check').style.color='blue';
+            }
+            else{
+                document.getElementById('check').innerHTML='비밀번호가 일치하지 않습니다.';
+                document.getElementById('check').style.color='red';
+            }
+        }
+    }
+	
+	</script>
+</head>
+<body>
+	<div id="wrap">
+		<div id="header">
+			<h1>회원가입</h1>
+		</div>
+		<form name = "insertUser" id="frm" enctype="multipart/form-data">
+			<div class="ui form success error">
+				<div id="main_left">
+					<div class="field">
+						<label>대표 이미지</label>
+						<img class="ui medium circular image" src="<c:url value='/'/>images/라이언 사진.png"/>
+						<input type="file" id="user_img" name="user_img" value="이미지 불러오기">
+					</div>
+				</div>
+	
+				<div id="main_right">
+					<div class="field">
+						<label>아이디 *</label> 
+						<input type="text" id="inputID" name="user_id" placeholder="ex) HongGilDong">
+						<button class="ui primary button fr" id="btn_idcheck">중복확인</button>
+					</div>
+					<div class="cjeck_font" id="id_check"></div>
+	
+					<div class="field">
+						<label>이름 *</label> 
+						<input type="text" id="user_name" name="user_name" placeholder="ex) 홍길동">
+					</div>
+	
+					<div class="field">
+						<label>비밀번호 *</label>
+						<input type="password" id="user_pw" name="user_pw" 
+							placeholder="ex) 비밀번호는 영문, 숫자, 특수문자 조합으로 6~20 자리를 사용" onchange="check_pw()">
+					</div>
+	
+					<div class="field">
+						<label>비밀번호 확인 *</label> 
+						<input type="password" id="user_pw_collect" onchange="check_pw()">
+						<span id="check"></span>
+					</div>
+	
+					<div class="field">
+						<label>이메일</label> 
+						<input type="email" id="user_email" name="user_email" placeholder="ex) naver@naver.com">
+					</div>
+	
+					<div class="field">
+						<label>전화번호</label> 
+						<input type="text" id="user_pnum" name="user_pnum" placeholder="ex) 010-1234-5678" maxlength='13'>
+					</div>
+	
+					<div class="field">
+						<label>생년월일 *</label> 
+						<input class="user_birth" type="text" id="user_year" name="user_year" placeholder=0000 maxlength='4'>/
+						<input class="user_birth" type="text" id="user_month" name="user_month" placeholder=00 maxlength='2'>/
+						<input class="user_birth" type="text" id="user_day" name="user_day" placeholder=00 maxlength='2'>
+					</div>
+				</div>
+			</div>
+	
+			<div class="clear"></div>
+	
+			<div id="footer">
+				<button type="button" class="ui submit button" id="btn_insertUser">회원가입</button>
+				<a class="ui button" href="<c:url value="/login/logIn.do"/>">취소</a>
+			</div>
+		</form>
+	</div>
+</body>
+</html>

@@ -1,0 +1,88 @@
+<%@ page contentType="text/html; charset=utf-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="ui" uri="http://egovframework.gov/ctl/ui"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%>
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.2/semantic.min.css" rel="stylesheet" type="text/css">
+	<link href="<c:url value='/'/>css/updateUser.css" rel="stylesheet" type="text/css" >
+	<title>사용자 정보수정</title>
+	
+	<script
+	  src="https://code.jquery.com/jquery-3.1.1.min.js"
+	  integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+	  crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.2/semantic.min.js"></script>
+</head>
+<body>
+    <div id="wrap">
+        <div id="header">
+            <h1>사용자 정보수정</h1>
+        </div>
+        <div class="ui form success error">
+            <div id="main_left">
+                <div class="field">
+                    <label>대표 이미지</label>
+                    <img class="ui medium circular image" src="images/라이언 사진.png">
+                    <button id="img_btn" class="ui button">이미지 불러오기</button>
+                </div>
+            </div>
+
+            <div id="main_right">
+                <div class="field">
+                    <label>아이디</label>
+                    <input id="inputID" type="text" value="HongGilDong" readonly>
+                </div>
+
+                <div class="field">
+                    <label>이름</label>
+                    <input type="text" value="홍길동" readonly>
+                </div>
+    
+                <div class="field">
+                    <label>비밀번호 *</label>
+                    <input type="password">
+                </div>
+    
+                <div class="field">
+                    <label>비밀번호 확인 *</label>
+                    <input type="password">
+                </div>
+                <div class="ui success, message">
+                    <div class="header">정확히 입력 하셨습니다.</div>
+                    <p>다음으로 항목으로 넘어가세요.</p>
+                </div>
+                <div class="ui error, message">
+                    <div class="header">잘못 입력 하셨습니다.</div>
+                    <p>다시 입력해주세요.</p>
+                </div>
+    
+                <div class="field">
+                    <label>이메일</label>
+                    <input type="email" value="naver@naver.com">
+                </div>
+
+                <div class="field" style="display: none;">
+                    <label>생년월일</label>
+                    <input type="text" value="1858/05/05">
+                </div>
+                
+                <div class="field">
+                    <label>전화번호</label>
+                    <input type="text" value="01012345678">
+                </div>
+            </div>
+        </div>
+
+        <div class="clear"></div>
+
+        <div id="footer">
+            <div class="ui button">수정</div>
+            <div class="ui button">취소</div>
+        </div>
+    </div>
+</body>
+</html>

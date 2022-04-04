@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="kr.co.negga.ntb.board.service.impl.BoardMapper">
+	<select id="selectList" parameterType="boardVO" resultType="boardVO">
+		select tbb.*
+		from(
+			select (row_number() over()) AS rn, tb.*
+			from(
+				SELECT
+					n.post_pnum,
+					n.post_regdate,
+					n.post_title,
+					n.post_contents,
+					n.post_img,
+					n.post_file,
+					n.post_fname,
+					n.post_like,
+					n.post_hits,
+					n.user_id,
+					n.cat_cname
+				from
+					ntb_post n
+				order by 
+					post_pnum desc
+				)tb
+				
+		<if test="cat_cname != null and cat_cname != '' ">
+			where cat_cname = #{cat_cname}
+		</if>	
+			order by
+				rn asc
+			)tbb
+		where rn between #{firstIndex} +1 and #{firstIndex} + #{recordCountPerPage}
+	</select>
+
+	<select id="selectListCnt" parameterType="boardVO" resultType="int">
+		SELECT
+			count(*)
+		FROM
+			ntb_post
+		<if test="cat_cname != null and cat_cname != '' ">
+		WHERE
+			cat_cname = #{cat_cname}
+		</if>
+	</select>
+	
+	<select id="selectCategory" parameterType="boardVO" resultType="boardVO">
+		SELECT
+			cat_cname
+		FROM
+			ntb_category
+	</select>
+	
+	<select id="selectOneList" parameterType="boardVO" resultType="boardVO">
+		SELECT 
+				post_pnum,
+				post_regdate,
+				post_title,
+				post_contents,
+				post_img,
+				post_file,
+				post_fname,
+				post_like,
+				post_hits,
+				user_id,
+				cat_cname
+				
+		FROM
+				ntb_post
+		WHERE
+				post_pnum = #{post_pnum}
+				
+	</select>
+	
+	
+	
+<!-- 	댓글 정보 DB에 추가		-->
+	<insert id="insertBoardReply" parameterType="boardVO" > 
+		INSERT INTO ntb_reply 
+			(
+			rep_rnum 
+			, rep_regdate
+			, rep_contents
+			, post_pnum
+			, user_id
+			)
+			
+		VALUES 
+			(
+			<!-- 
+			1. rep_num 의 값이 없을때 => 1로 박음
+			1
+			2. rep_num 의 값이 있을때 => max(rep_num)+1
+			(select max(rep_rnum) + 1 from ntb_reply)
+			 -->
+			
+			(select coalesce(max(rep_rnum),0)+1 from ntb_reply)
+
+			, NOW()
+			, #{rep_contents}
+			, #{post_pnum}
+			, #{rep_user_id}
+			)
+    </insert>
+    
+    
+<!--     댓글 전체 불러오기 -->
+    <select id="selectBoardReply" parameterType="boardVO" resultType="boardVO" >
+    	select 
+    		rep_rnum, 
+    		rep_regdate,
+    		rep_contents, 
+    		post_pnum, 
+    		user_id
+    	from 
+    		ntb_reply
+    	where 
+    		post_pnum = #{post_pnum}
+    </select>
+    
+    <!-- 	게시글 insert		-->
+    <insert id="insertTechList" parameterType="boardVO" >
+    	insert into ntb_post
+    	values(nextval('ntb_post_pnum_seq'), now(), #{post_title}, #{post_contents}, #{post_img}, #{post_file}, null, 0, 0, #{user_id}, #{cat_cname}, null)
+    </insert>
+</mapper>

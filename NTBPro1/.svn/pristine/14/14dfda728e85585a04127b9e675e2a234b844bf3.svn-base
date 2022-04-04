@@ -1,0 +1,180 @@
+package kr.co.negga.ntb.board.service;
+
+import java.util.List;
+
+
+
+/**
+ * @Class BoardService.java
+ * @Description 게시판 관련 서비스 Interface
+ * @Since 2022.03.16
+ * @author hsan
+ * @version 1.0
+ * @Modification 수정사항 없음 
+ */
+public interface BoardService {
+
+	/**
+	 * 게시판 리스트를 불러온다.
+	 * @param vo 게시판 정보가 담긴 BoardVO
+	 * @return 게시판 정보 BoardVO
+	 * @exception Exception
+	 */
+	public List<BoardVO> selectList(BoardVO vo) throws Exception;
+
+	/**
+	 * 게시판 총 게시물 갯수를 불러온다.
+	 * @param vo 게시판 정보가 담긴 BoardVO
+	 * @return int 총 게시물 갯수
+	 * @exception Exception
+	 */
+	public int selectListCnt(BoardVO vo) throws Exception;
+
+	/**
+	 * 게시판 카테고리를 불러온다.
+	 * @param vo 카테고리 정보가 담긴 BoardVO
+	 * @return List 총 카테고리 갯수
+	 * @exception Exception
+	 */
+	public List<BoardVO> selectCategory(BoardVO vo) throws Exception;
+
+
+	/**
+	 * 게시글 한개를 가져온다.
+	 * @param vo 카테고리 정보가 담긴 BoardVO
+	 * @return 게시판 정보 BoardVO
+	 * @exception Exception
+	 */
+	public BoardVO selectBoardDetail(BoardVO vo) throws Exception;
+
+	/**
+	 * 게시판 게시글 수정
+	 * @param vo 카테고리 정보가 담긴 BoardVO
+	 * @return 게시판 정보 BoardVO
+	 * @exception Exception
+	 */
+	public int updateBoardDetail(BoardVO vo) throws Exception;
+	
+	/**
+	 * 게시판 게시글 삭제
+	 * @param vo 카테고리 정보가 담긴 BoardVO
+	 * @return 게시판 정보 BoardVO
+	 * @exception Exception
+	 */
+	public int deleteBoardDetail(BoardVO vo) throws Exception;
+	
+	/**
+	 * 댓글을 단다.
+	 * @param vo 카테고리 정보가 담긴 BoardVO
+	 * @return 게시판 정보 BoardVO
+	 * @exception Exception
+	 */
+	public int insertBoardReply(BoardVO vo) throws Exception;
+		
+	/**
+	 * 댓글을 불러온다
+	 * @param vo 카테고리 정보가 담긴 BoardVO
+	 * @return 게시판 정보 BoardVO
+	 * @exception Exception
+	 */
+	public List<BoardVO> selectBoardReplyList(BoardVO vo) throws Exception;
+
+	/**
+	 * 댓글을 수정한다
+	 * @param vo 카테고리 정보가 담긴 BoardVO
+	 * @return 게시판 정보 BoardVO
+	 * @exception Exception
+	 */
+	public int updateBoardReplyList(BoardVO vo) throws Exception;
+
+	/**
+	 * 댓글을 삭제한다
+	 * @param vo 카테고리 정보가 담긴 BoardVO
+	 * @return 게시판 정보 BoardVO
+	 * @exception Exception
+	 */
+	public int deleteBoardReplyList(BoardVO vo) throws Exception;
+	
+
+	/**
+	 * 댓글 총 갯수 불러오기
+	 * @param vo 카테고리 정보가 담긴 BoardVO
+	 * @return 게시판 정보 BoardVO
+	 * @exception Exception
+	 */
+	public int selectBoardReplyCount(BoardVO vo) throws Exception;
+
+	/**
+	 * 게시글 좋아요 
+	 * @param vo 카테고리 정보가 담긴 BoardVO
+	 * @return 게시판 정보 BoardVO
+	 * @exception Exception
+	 */
+	public int replyLikeAdd(BoardVO vo) throws Exception;
+
+	/**
+	 * 게시글 좋아요 취소
+	 * @param vo 카테고리 정보가 담긴 BoardVO
+	 * @return 게시판 정보 BoardVO
+	 * @exception Exception
+	 */
+	public int replyLikeCancel(BoardVO vo) throws Exception;
+
+	/**
+	 * 게시글 좋아요 불러오기
+	 * @param vo 카테고리 정보가 담긴 BoardVO
+	 * @return 게시판 정보 BoardVO
+	 * @exception Exception
+	 */
+	public BoardVO replyLikeShow(BoardVO vo) throws Exception;
+
+	/**
+	 * 게시글 좋아요 개수 불러오기
+	 * @param vo 카테고리 정보가 담긴 BoardVO
+	 * @return 게시판 정보 BoardVO
+	 * @exception Exception
+	 */
+	public int selectReplyLikeCount(BoardVO vo) throws Exception;
+
+	/**
+	 * 게시글 싫어요 
+	 * @param vo 카테고리 정보가 담긴 BoardVO
+	 * @return 게시판 정보 BoardVO vo
+	 * @exception Exception
+	 */
+	public int replyHateAdd(BoardVO vo) throws Exception;
+
+	/**
+	 * 게시글 싫어요 취소
+	 * @param vo 카테고리 정보가 담긴 BoardVO
+	 * @return 게시판 정보 oardVO vo
+	 * @exception Exception
+	 */
+	public int replyHateCancel(BoardVO vo) throws Exception;
+
+	/**
+	 * 게시글 싫어요 불러오기
+	 * @param vo 카테고리 정보가 담긴 BoardVO
+	 * @return 게시판 정보 oardVO vo
+	 * @exception Exception
+	 */
+	public BoardVO replyHateShow(BoardVO vo) throws Exception;
+
+	/**
+	 * 게시글 싫어요 개수 불러오기
+	 * @param vo 카테고리 정보가 담긴 BoardVO
+	 * @return 게시판 정보 BoardVO
+	 * @exception Exception
+	 */
+	public int selectReplyHateCount(BoardVO vo) throws Exception;
+	
+	/**
+	 * 게시글을 작성한다.
+	 * @param vo 게시판 정보가 담긴 BoardVO
+	 * @return 작성 결과 oardVO vo
+	 * @exception Exception
+	 */
+	public int insertTechList(BoardVO vo) throws Exception;
+	
+
+}

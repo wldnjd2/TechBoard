@@ -1,0 +1,260 @@
+<%@page import="org.stringtemplate.v4.compiler.STParser.mapExpr_return"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>내가시스템 :: 기술게시판</title>
+<%@ include file="/WEB-INF/jsp/admin/manageUser.jsp" %>
+<%@ include file="/WEB-INF/jsp/board/insertTechBoardList.jsp" %>
+<link rel="stylesheet" href="<c:url value='css/main/main.css' />">
+
+<link rel="stylesheet" href="<c:url value='css/board/detailContents.css' />">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.2/semantic.min.css" rel="stylesheet" type="text/css">
+<script
+      src="https://code.jquery.com/jquery-3.1.1.min.js"
+      integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+      crossorigin="anonymous"></script>
+
+<!-- RSA암호화 조건 -->
+<script type="text/javascript" src="http://www-cs-students.stanford.edu/~tjw/jsbn/rsa.js"></script>
+<script type="text/javascript" src="http://www-cs-students.stanford.edu/~tjw/jsbn/jsbn.js"></script>
+<script type="text/javascript" src="http://www-cs-students.stanford.edu/~tjw/jsbn/prng4.js"></script>
+<script type="text/javascript" src="http://www-cs-students.stanford.edu/~tjw/jsbn/rng.js"></script>
+      
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="<c:url value='js/main/manageAccount.js'/>"></script>
+<script src="<c:url value='js/board/techBoardList_paging.js'/>"></script>
+<script src="<c:url value='js/admin/manageTechBoardList.js'/>"></script>
+
+<script src="<c:url value='js/board/detailContents.js'/>"></script>
+<script type="text/javascript">
+	
+	function init(){
+		pagination_techBoardList(1, '');
+	}
+
+</script>
+
+
+</head>
+<body onload="init();">
+	<div id="all_div">
+		<header>
+			<div id="menu"></div>
+		</header>
+
+		<div id="logo-div">
+			<div id="logo-img">
+				<img src='<c:url value="/images/logo.png"/>' alt="로고" />
+			</div>
+		</div>
+
+		<div id="board-category">
+			<div id="category"></div>
+		</div>
+
+		<div id="board-div">
+			<div id="board">
+				<table class="ui celled table">
+					<colgroup id="listColGroup">
+						<col width="50px">
+						<col width="60px">
+						<col width="230px">
+						<col width="50px">
+						<col width="70px">
+						<col width="40px">
+					</colgroup>
+					<thead>
+						<tr id="listTr">
+							<th>번호</th>
+							<th>카테고리</th>
+							<th>제목</th>
+							<th>작성자</th>
+							<th>날짜</th>
+							<th>조회수</th>
+						</tr>
+					</thead>
+					
+					<tr id="tr-async1" class="tr-async" ></tr>
+					<tr id="tr-async2" class="tr-async" ></tr>
+					<tr id="tr-async3" class="tr-async" ></tr>
+					<tr id="tr-async4" class="tr-async" ></tr>
+					<tr id="tr-async5" class="tr-async" ></tr>
+					<tr id="tr-async6" class="tr-async" ></tr>
+				</table>
+				<div id="manageBoardListBtn"></div>
+				<div id="pagination"></div>
+
+			</div>
+		</div>
+
+
+<!----------------게시글 상세보기 모달창 시작	 -->
+		<div class="detailModal_board detailModal_hidden">
+			<div class="detailModal_overlay"></div>
+			<div class="detailModal_content">
+				<button class="closeBtn2 fr" onclick="closeModal()">x</button>
+				<h2 class="center">게시판 상세내용</h2>
+				<br>
+			<div id="detail_div">
+				<table id="detail_tbl">
+					<tr style="display: none;" id="detail_tr1">
+						<th bgcolor="#C0D6E4" style="height: 33px;">번호</th>
+						<td colspan="2" id="post_pnum" ></td>
+					</tr>
+					<tr class="detailModal_table" id="detail_tr2" >
+						<th bgcolor="#C0D6E4" style="height: 33px; width: 100px;">작성일</th>
+						<td colspan="2" style="text-align: left; padding-left: 10px; width: 1000px ;" colspan="2" id="post_regdate"></td>
+					</tr>
+					
+					<tr class="detailModal_table" id="detail_tr3" >
+						<th bgcolor="#C0D6E4" style="height: 33px;">작성자</th>
+						<td style="width: 100px;">
+							<img id="writer_img" align = "left" src="" style="height: 41px;">
+						<p id="user_id" style="text-align: left; transform: translateY(60%);"></p>
+<!-- 						<td style="text-align: left; " id="user_id"></td> -->
+					</tr>
+					
+					<tr class="detailModal_table" id="detail_tr4">
+						<th bgcolor="#C0D6E4" style="height: 33px;">제목</th>
+						<td colspan="2" style="text-align: left; padding-left: 10px;" colspan="2" id="post_title"></td>
+					</tr>
+					
+					<tr class="detailModal_table" id="detail_tr5" >
+						<th bgcolor="#C0D6E4" style="height: 200px;">내용</th>
+						<td>
+							<img src="" id="post_img" style="width:500px;" >
+						</td>
+						
+						<td style="text-align: left;" id="detail_post_contents"></td>
+					</tr>
+
+<!-- 수정중----------첨부파일 -->
+<!-- 					<tr class="detailModal_table" > -->
+<!-- 						<th bgcolor="#C0D6E4" style="height: 33px;">첨부파일</th> -->
+<!-- 						<td style="text-align: left;" colspan="2" id="detail_post_fname"> -->
+<!-- 						<td> -->
+<!-- 							<a href="" id="detail_post_file"></a> -->
+<!-- 						</td> -->
+<!-- 					</tr> -->
+				</table>
+			</div>
+				<br>
+					<div class="button_div">
+					<!--좋아용 -->
+					<div class ="center fl" id="like_btn">
+						<button onclick="LikeModal($('#post_pnum')[0].innerText);" id="post_like" class="ui button"></button>
+					</div>
+					<div id="likeCount_div" class ="center fl select_text"></div>
+					<div class ="center fl " id="hate_btn">
+						<button onclick="HateModal($('#post_pnum')[0].innerText);" id="post_hate" class="ui button"></button>
+					</div>
+					<!--싫어요 -->
+					<div id="HateCount_div" class ="center fl select_text"></div>
+				</div>
+				
+				<div class="clear"></div><br>
+				
+				<!--수정 삭제 목록 -->
+				<!--관리자모드 -->
+				<div id="manageDiv" class="center" style = "display:none">
+					<button class="ui primary button" onclick="modifyModalDetail($('#post_pnum')[0].innerText);" disabled="disabled">수정</button>
+					<button class="ui primary button" onclick="deleteModalDetail($('#post_pnum')[0].innerText);">삭제</button>
+					<button class="ui primary button" onclick="closeModal();" >목록</button>
+				</div>
+				<!--게스트모드 -->
+				<div id="guestDiv" class="center" style = "display:none">
+					<button class="ui primary button" onclick="closeModal();">목록</button>
+				</div>
+				<div>
+				<div class="clear"></div><br>
+					<hr>
+					
+					<!--댓글  작성하기-->
+					comment <br>
+
+					<textarea id="rep_contents" placeholder="댓글을 작성하세요." rows="2" cols="80"></textarea><br>
+					<div class="ui blue labeled submit icon button fr" onclick="replyInsert($('#post_pnum')[0].innerText);">
+      					<i class="icon edit"></i> 댓글 작성
+    				</div>
+					<br>
+					<br>
+				</div>
+				
+				<!--댓글달기 -->
+				댓글 총 갯수 (<span id="rep_rnum_CNT"></span>)<br><br>
+				<div id="replyModal">
+				</div>
+				
+			</div>
+		</div>
+<!------------게시글 상세보기 모달창 끝	 -->
+
+	<div id="modal_back">
+		<div id="wrap">
+			<div id="header">
+				<button class="closeBtn" onclick="closeModal2()">x</button>
+				<h1>사용자 정보수정</h1>
+			</div>
+			<form name="updateUser" id="frm_update">
+				<div class="ui form success error">
+					<div id="main_left">
+						<div class="field" id="image_field">
+							<label>대표 이미지</label>
+		                    <label for="uploadFile" id="image_field_upload">업로드</label>
+		                    <input type="file" id="uploadFile" accept="image/jpeg, image/jpg, image/png" onchange="toBase64(event);">
+		                    <img class="thumb" src="" id="img" style="width: 150px; height: 150px;">
+		                    <a href="javascript:void(0);" class="dellink">파일 삭제</a>
+		                    <input type="hidden" id="user_img" name="user_img" >
+						</div>
+					</div>
+
+					<div id="main_right">
+						<div class="field">
+							<label>아이디</label> <input id="inputID" type="text" name="user_id"
+								value="${Session_user_id}" readonly>
+						</div>
+
+						<div class="field">
+							<label>이름</label> <input type="text" id="user_name" 
+								name="user_name" readonly>
+						</div>
+
+						<div class="field">
+							<label>비밀번호 *</label> <input type="password" id="user_pw"
+								name="user_pw">
+						</div>
+
+						<div class="field">
+							<label>이메일</label> <input type="email" id="user_email"
+								name="user_email">
+						</div>
+
+						<div class="field">
+							<label>전화번호</label> <input type="text" id="user_pnum"
+								name="user_pnum">
+						</div>
+						<p>* 비밀번호를 정확히 입력하여야 수정 가능.</p>
+						<div class="field">
+							<label style="display: none;">생년월일</label> <input type="hidden"
+								id="user_birth" name="user_birth" />
+						</div>
+						<input type="hidden" id="user_rank" name="user_rank" />
+					</div>
+				</div>
+				<div class="clear"></div>
+			</form>
+			<div id="footer">
+				<button id="updateAccount_btn" type="button" class="ui button">수정</button>
+				<button id="update_cancel_btn" onclick="closeModal2()"
+					class="ui button">취소</button>
+			</div>
+		</div>
+	</div>
+	</div>
+</body>
+</html>
